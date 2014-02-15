@@ -1,0 +1,29 @@
+/* blg59 */
+/* . for class, # for id */
+body{
+    background-color: #000;
+    color: #D6FAFF;
+    font-family: "Palatino Linotype",Palatino,serif;
+}
+
+body a {
+  color: #7F49F2;
+}
+
+figcaption {
+    font-size: 80%;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.header h1 {
+    color: #7F49F2;
+}
+
+.header img {
+    align: middle;
+    height: 400px;
+}
