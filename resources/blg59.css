@@ -1,7 +1,5 @@
-/* blg59 */
-/* . for class, # for id */
 body{
-    background-color: #000;
+    background-color: #222222;
     color: #D6FAFF;
     font-family: "Palatino Linotype",Palatino,serif;
 }
@@ -15,8 +13,13 @@ figcaption {
 }
 
 .header {
+    align: middle;
+    margin-bottom: 30px;
     text-align: center;
-    margin-bottom: 50px;
+}
+
+.header a {
+    text-decoration: none;
 }
 
 .header h1 {
@@ -24,6 +27,12 @@ figcaption {
 }
 
 .header img {
-    align: middle;
     height: 400px;
+}
+
+.tagline {
+    text-align: center;
+    align: middle;
+    margin-top: -5px;
+    font-style: italic;
 }
