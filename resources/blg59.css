@@ -30,6 +30,15 @@ figcaption {
     height: 400px;
 }
 
+.nav {
+    background-color: #000000;
+    height: 50px;
+    width: 100%;
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+}
+
 .tagline {
     text-align: center;
     align: middle;
