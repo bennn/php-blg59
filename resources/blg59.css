@@ -35,18 +35,19 @@ figcaption {
     bottom: 0px;
     height: 50px;
     left: 0px;
-    /* padding-left: 25%; */
     position: fixed;
     width: 100%;
 }
 
 .target {
-    align: center;
+    border: 2px;
     border-color: #ffffff;
     border-radius: 3px;
-    border: 2px;
+    border-style: solid;
     float: left;
-    height: 46px;
+    height: 42px;
+    margin-top: 2px;
+    margin-left: 70px;
     text-align: center;
     width: 150px;
 }
