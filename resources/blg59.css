@@ -1,7 +1,10 @@
-body{
+html body {
     background-color: #222222;
     color: #D6FAFF;
     font-family: "Palatino Linotype",Palatino,serif;
+    height: 100%;
+    width: 100%;
+    font-size: 100%;
 }
 
 body a {
@@ -14,8 +17,9 @@ figcaption {
 
 .header {
     align: middle;
-    margin-bottom: 30px;
+    margin-bottom: 2%;
     text-align: center;
+    height: 10%;
 }
 
 .header a {
@@ -27,14 +31,14 @@ figcaption {
 }
 
 .header img {
-    height: 400px;
+    height: 65%;
 }
 
 .nav {
     background-color: #000000;
-    bottom: 0px;
-    height: 50px;
-    left: 0px;
+    bottom: 0%;
+    height: 8%;
+    left: 0%;
     position: fixed;
     width: 100%;
 }
@@ -45,16 +49,18 @@ figcaption {
     border-radius: 3px;
     border-style: solid;
     float: left;
-    height: 42px;
-    margin-top: 2px;
-    margin-left: 70px;
+    font-size: 1em;
+    height: 80%;
+    margin-top: 0.25%;
+    margin-left: 5%;
     text-align: center;
-    width: 150px;
+    width: 10%;
 }
 
 .tagline {
     text-align: center;
     align: middle;
-    margin-top: -5px;
+    margin-top: -1%;
     font-style: italic;
+    height: 10%;
 }
