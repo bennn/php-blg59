@@ -8,7 +8,7 @@ html body {
 }
 
 body a {
-  color: #7F49F2;
+    color: #7F49F2;
 }
 
 figcaption {
@@ -24,10 +24,6 @@ figcaption {
 
 .header a {
     text-decoration: none;
-}
-
-.header h1 {
-    color: #7F49F2;
 }
 
 .header img {
