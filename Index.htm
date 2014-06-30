@@ -2,10 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <!-- TODO favicon -->
-    <link rel="stylesheet" type="text/css" href="resources/blg59.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="en-us" />
+    <link rel="shortcut icon" href="resources/img/cu.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="resources/blg59.css"/>
     <!-- <script src="http://code.jquery.com/jquery-1.9.min.js"></script> -->
-    <script src="resources/blg59.js"></script>
-    <!-- Thanks to http://www.schillmania.com/projects/snowstorm/ -->
+    <!-- <script src="resources/blg59.js"></script> -->
+    <!-- <\!-- Thanks to http://www.schillmania.com/projects/snowstorm/ -\-> -->
     <!-- <script src="resources/snowstorm.js"></script> -->
     <title>
       Benjamin Lee Greenman
@@ -16,6 +19,8 @@
       <h1><a href="./extras/why-the-full-name.html">
         Benjamin Lee Greenman
       </a></h1>
+    </div>
+    <div class="main">
       <img src="resources/img/161.png"/>
       <!-- <img src="resources/img/branch.png"/> -->
       <figcaption>
@@ -29,27 +34,27 @@
     <div class="nav">
       <a href="about/about.html"><div class="target">
         <p>
-          &lambda; . About
+          About
         </p>
       </div></a>
       <a href="cv/cv-short.pdf"><div class="target">
         <p>
-          &lambda; . CV
+          CV
         </p>
       </div></a>
       <a href="news/news.html"><div class="target">
         <p>
-          &lambda; . News
+          News
         </p>
       </div></a>
       <a href="publications/publications.html"><div class="target">
         <p>
-          &lambda; . Publications
+          Publications
         </p>
       </div></a>
       <a href="teaching/teaching.html"><div class="target">
         <p>
-          &lambda; . Teaching
+          Teaching
         </p>
       </div></a>
       <a href="extras/extras.html"><div class="target">
@@ -58,5 +63,15 @@
         </p>
       </div></a>
     </div>
+    <script>
+      $(window).bind('resize', function(e)
+        {
+          if (window.RT) clearTimeout(window.RT);
+          window.RT = setTimeout(function()
+            {
+               this.location.reload(false);
+            }, 100);
+      });
+    </script>
   </body>
 </html>
