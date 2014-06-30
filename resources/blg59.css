@@ -1,6 +1,6 @@
 html body {
     background-color: #222222;
-    color: #D6FAFF;
+    color: #89cce2;
     font-family: "Palatino Linotype",Palatino,serif;
     height: 100%;
     width: 100%;
@@ -11,23 +11,60 @@ body a {
     color: #7F49F2;
 }
 
+.doodle img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10%;
+}
+
 figcaption {
     font-size: 80%;
 }
 
 .header {
-    align: middle;
-    margin-bottom: 2%;
+    margin-top: 1%;
     text-align: center;
     height: 10%;
+    width: 100%;
 }
 
 .header a {
     text-decoration: none;
 }
 
-.header img {
+.main {
+    display: block;
+    margin-bottom: 2%;
+    height: 10%;
+    text-align: center;
+}
+
+.main img {
     height: 65%;
+}
+
+.midcol {
+    background-color: #d8d2c9;
+    border: 5px solid #a2998b;
+    color: #222222;
+    margin-bottom: 20%;
+    margin-left: 20%;
+    margin-right: 20%;
+    margin-top: 1%;
+    padding-bottom: 1%;
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-top: 1%;
+}
+
+.midcol p {
+    line-height: 130%;
+}
+
+.midcol .indent {
+    /* line-height: 120%; */
+    text-indent: 2%;
 }
 
 .nav {
@@ -37,6 +74,37 @@ figcaption {
     left: 0%;
     position: fixed;
     width: 100%;
+}
+
+.publication {
+    color: #00355f;
+}
+
+.inlinelink {
+    color: #00355f;
+    text-decoration: none;
+}
+
+.publication .coauthor {
+    color: #0068ac;
+    text-decoration: none;
+}
+
+.publication .pubtitle {
+    font-weight: normal;
+    margin-bottom: 10px;
+}
+
+.publication .publink {
+    color: #0068ac;
+    font-size: 135%;
+    font-style: italic;
+    text-decoration: none;
+}
+
+.publication .pubauthors {
+    margin-top: 5px;
+    margin-left: 3%;
 }
 
 .target {
@@ -54,9 +122,9 @@ figcaption {
 }
 
 .tagline {
-    text-align: center;
     align: middle;
-    margin-top: -1%;
     font-style: italic;
     height: 10%;
+    margin-top: -1%;
+    text-align: center;
 }
