@@ -11,6 +11,19 @@ body a {
     color: #7F49F2;
 }
 
+.block {
+    background: #222222;
+    border: solid 1px #222222;
+    height: 1%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 9%;
+}
+
+.classyspace {
+    height: 2%;
+}
+
 .doodle img {
     display: block;
     margin-left: auto;
@@ -63,7 +76,6 @@ figcaption {
 }
 
 .midcol .indent {
-    /* line-height: 120%; */
     text-indent: 2%;
 }
 
@@ -92,7 +104,7 @@ figcaption {
 
 .publication .pubtitle {
     font-weight: normal;
-    margin-bottom: 10px;
+    margin-bottom: 2%;
 }
 
 .publication .publink {
@@ -108,10 +120,8 @@ figcaption {
 }
 
 .target {
-    border: 2px;
-    border-color: #ffffff;
+    border: 2px solid #ffffff;
     border-radius: 3px;
-    border-style: solid;
     float: left;
     font-size: 1em;
     height: 80%;
@@ -127,4 +137,22 @@ figcaption {
     height: 10%;
     margin-top: -1%;
     text-align: center;
+}
+
+.resumebox {
+    width: 30%;
+    height: 40%;
+    float: left;
+    margin-left: 13%;
+    color: #222222;
+    text-align: center;
+}
+
+.resumefig {
+    height: 20%;
+    margin-bottom: -10%;
+}
+
+.resumefoot {
+    clear: both;
 }
