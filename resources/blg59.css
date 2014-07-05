@@ -92,12 +92,12 @@ figcaption {
     color: #00355f;
 }
 
-.inlinelink {
+.hiddenlink {
     color: #00355f;
     text-decoration: none;
 }
 
-.coauthor {
+.colorlink {
     color: #0068ac;
     text-decoration: none;
 }
