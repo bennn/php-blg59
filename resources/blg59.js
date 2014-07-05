@@ -1,4 +1,0 @@
-function nils () {
-    return "nils";
-};
-
