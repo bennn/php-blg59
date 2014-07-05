@@ -82,7 +82,7 @@ figcaption {
 .nav {
     background-color: #000000;
     bottom: 0%;
-    height: 8%;
+    height: 12%;
     left: 0%;
     position: fixed;
     width: 100%;
@@ -123,12 +123,12 @@ figcaption {
     border: 2px solid #ffffff;
     border-radius: 3px;
     float: left;
-    font-size: 1em;
-    height: 80%;
+    font-size: 140%;
+    height: 85%;
     margin-top: 0.25%;
-    margin-left: 5%;
+    margin-left: 4%;
     text-align: center;
-    width: 10%;
+    width: 12%;
 }
 
 .tagline {
