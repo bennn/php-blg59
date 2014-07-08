@@ -12,12 +12,12 @@ body a {
 }
 
 .block {
-    background: #222222;
-    border: solid 1px #222222;
+    background-color: #a2998b;
+    border: solid 2px #a2998b;
     height: 1%;
     margin-left: auto;
     margin-right: auto;
-    width: 9%;
+    width: 100%;
 }
 
 .classyspace {
@@ -100,6 +100,25 @@ figcaption {
 .colorlink {
     color: #0068ac;
     text-decoration: none;
+}
+
+.newsitem {
+    /* border: 3px solid #a2998b; */
+    /* background-color: #bfb778; */
+    margin-top: 1%;
+    margin-bottom: 1%;
+    padding: 1%;
+}
+
+.newsdate {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.newsdata {
+    margin-top: 1%;
+    margin-bottom: 1%;
+    margin-left: 5%;
 }
 
 .publication .pubtitle {
