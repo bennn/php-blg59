@@ -61,7 +61,7 @@ figcaption {
     background-color: #d8d2c9;
     border: 5px solid #a2998b;
     color: #222222;
-    margin-bottom: 20%;
+    margin-bottom: 5%;
     margin-left: 20%;
     margin-right: 20%;
     margin-top: 1%;
@@ -80,7 +80,7 @@ figcaption {
 }
 
 .nav {
-    background-color: #000000;
+    background-color: #0a0a0a;
     bottom: 0%;
     height: 12%;
     left: 0%;
@@ -88,12 +88,8 @@ figcaption {
     width: 100%;
 }
 
-.publication {
-    color: #00355f;
-}
-
 .hiddenlink {
-    color: #00355f;
+    color: #222222;
     text-decoration: none;
 }
 
@@ -103,8 +99,6 @@ figcaption {
 }
 
 .newsitem {
-    /* border: 3px solid #a2998b; */
-    /* background-color: #bfb778; */
     margin-top: 1%;
     margin-bottom: 1%;
     padding: 1%;
@@ -122,6 +116,7 @@ figcaption {
 }
 
 .publication .pubtitle {
+    color: #00355f;
     font-weight: normal;
     margin-bottom: 2%;
 }
