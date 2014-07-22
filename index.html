@@ -1,1 +1,72 @@
-zardoz
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="en-us" />
+    <link rel="shortcut icon" href="resources/img/cu.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="resources/blg59.css"/>
+    <title>
+      Benjamin Lee Greenman
+    </title>
+  </head>
+  <body>
+    <div class="header">
+      <h1><a href="./extras/why-the-full-name.html">
+        Benjamin Lee Greenman
+      </a></h1>
+    </div>
+    <div class="main">
+      <img src="resources/img/161.png"/>
+      <!-- <img src="resources/img/branch.png"/> -->
+      <figcaption>
+      <!-- Ithaca, NY : May 2013 -->
+      Ithaca, NY : March 2013
+      </figcaption>
+    </div>
+    <div class="tagline">
+      <h2>"Seeking a well-typed world."</h2>
+    </div>
+    <div class="nav">
+      <a href="about/about.html"><div class="target">
+        <p>
+          About
+        </p>
+      </div></a>
+      <a href="cv/cv.html"><div class="target">
+        <p>
+          CV
+        </p>
+      </div></a>
+      <a href="news/news.html"><div class="target">
+        <p>
+          News
+        </p>
+      </div></a>
+      <a href="publications/publications.html"><div class="target">
+        <p>
+          Publications
+        </p>
+      </div></a>
+      <a href="teaching/teaching.html"><div class="target">
+        <p>
+          Teaching
+        </p>
+      </div></a>
+      <a href="extras/extras.html"><div class="target">
+        <p>
+          &lambda; . 0
+        </p>
+      </div></a>
+    </div>
+    <script>
+      $(window).bind('resize', function(e)
+        {
+          if (window.RT) clearTimeout(window.RT);
+          window.RT = setTimeout(function()
+            {
+               this.location.reload(false);
+            }, 100);
+      });
+    </script>
+  </body>
+</html>

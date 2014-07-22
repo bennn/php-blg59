@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <!-- <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script> -->
+    <script src="ipoe.js"></script>
+    <link rel="stylesheet" type="text/css" href="ipoe.css"/>
+    <title>iPoe</title>
+  </head>
+  <body>
+    <h2 class="samples">Simple Editor</h2>
+
+    <div>
+      <form action="">
+        <input type="radio" name="poemType" value="haiku" onClick="setHaiku();">Haiku<br>
+        <input type="radio" name="poemType" value="villanella" onClick="setVillanelle();">Villanelle
+      </form>
+    </div>
+    <div>
+      <textarea id="editor" rows="10" cols="80">
+        lol world
+      </textarea>
+    </div>
+    <div>
+      <input type="button" value="Compile" onClick="compile();">
+    </div>
+  </body>
+</html>

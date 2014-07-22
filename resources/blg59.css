@@ -1,0 +1,172 @@
+html body {
+    background-color: #222222;
+    color: #89cce2;
+    font-family: "Palatino Linotype",Palatino,serif;
+    height: 100%;
+    width: 100%;
+    font-size: 100%;
+}
+
+body a {
+    color: #7F49F2;
+}
+
+.block {
+    background-color: #a2998b;
+    border: solid 2px #a2998b;
+    height: 1%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+.classyspace {
+    height: 2%;
+}
+
+.doodle img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10%;
+}
+
+figcaption {
+    font-size: 80%;
+}
+
+.header {
+    margin-top: 1%;
+    text-align: center;
+    height: 10%;
+    width: 100%;
+}
+
+.header a {
+    text-decoration: none;
+}
+
+.main {
+    display: block;
+    margin-bottom: 2%;
+    height: 10%;
+    text-align: center;
+}
+
+.main img {
+    height: 65%;
+}
+
+.midcol {
+    background-color: #d8d2c9;
+    border: 5px solid #a2998b;
+    color: #222222;
+    margin-bottom: 5%;
+    margin-left: 20%;
+    margin-right: 20%;
+    margin-top: 1%;
+    padding-bottom: 1%;
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-top: 1%;
+}
+
+.midcol p {
+    line-height: 130%;
+}
+
+.midcol .indent {
+    text-indent: 2%;
+}
+
+.nav {
+    background-color: #0a0a0a;
+    bottom: 0%;
+    height: 12%;
+    left: 0%;
+    position: fixed;
+    width: 100%;
+}
+
+.hiddenlink {
+    color: #222222;
+    text-decoration: none;
+}
+
+.colorlink {
+    color: #0068ac;
+    text-decoration: none;
+}
+
+.newsitem {
+    margin-top: 1%;
+    margin-bottom: 1%;
+    padding: 1%;
+}
+
+.newsdate {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.newsdata {
+    margin-top: 1%;
+    margin-bottom: 1%;
+    margin-left: 5%;
+}
+
+.publication .pubtitle {
+    color: #00355f;
+    font-weight: normal;
+    margin-bottom: 2%;
+}
+
+.publication .publink {
+    color: #0068ac;
+    font-size: 135%;
+    font-style: italic;
+    text-decoration: none;
+}
+
+.publication .pubauthors {
+    margin-top: 5px;
+    margin-left: 3%;
+}
+
+.target {
+    border: 2px solid #ffffff;
+    border-radius: 3px;
+    float: left;
+    font-size: 140%;
+    height: 85%;
+    margin-top: 0.25%;
+    margin-left: 4%;
+    text-align: center;
+    width: 12%;
+}
+
+.tagline {
+    align: middle;
+    font-style: italic;
+    height: 10%;
+    margin-top: -1%;
+    text-align: center;
+}
+
+.resumebox {
+    width: 30%;
+    height: 40%;
+    float: left;
+    margin-left: 13%;
+    color: #222222;
+    text-align: center;
+}
+
+.resumefig {
+    height: 20%;
+    margin-bottom: -10%;
+}
+
+.resumefoot {
+    clear: both;
+}
