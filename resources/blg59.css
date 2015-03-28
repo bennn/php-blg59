@@ -46,6 +46,12 @@ figcaption {
     text-decoration: none;
 }
 
+.keepalive {
+  float: right;
+  margin-right: 40px;
+  /* margin-left: 16px; */
+}
+
 .main {
     display: block;
     margin-bottom: 2%;
