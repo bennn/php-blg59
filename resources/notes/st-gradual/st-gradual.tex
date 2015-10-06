@@ -1,0 +1,34 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Gradual Typing for Functional Languages}
+
+This paper introduces the catchphrase ``gradual typing'' and describes a cast-based type system that admits untyped terms~\cite{st-gradual}.
+Type safety in this system means that if a term may be assigned a type (with ``dynamic'' holes), then it will evaluate to either a value or a run-time cast error.
+To handle diverging terms, the authors parameterize evaluation by a natural number limiting the number of computation steps.
+
+\qquad The paper is written ``by th' book''~\cite{p-tapl} and reads nicely.
+Moreover, all proofs are formalized in Isabelle.
+
+
+\swtable{
+\item Excellent title.
+\item Clear presentation.
+\item Casts are a neat solution to mutable references and untyped functions.
+  (Rather than striving to preserve an invariant, delay the check until necessary.)
+}{
+\item
+  The benefits of the untyped language are not well motivated (besides terms like ``flexible'' etc).
+  In particular, I would like to know when gradual typing might be more useful than type inference.
+\item
+  Eliding blame is a mistake.
+  A $\mathsf{CastError}$ is no better than a segfault if it does not accurately tell where the problem occurred.
+}
+
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{st-gradual}
+\end{document}

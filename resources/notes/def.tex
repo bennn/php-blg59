@@ -1,0 +1,26 @@
+\usepackage{hyperref}
+\usepackage{palatino}
+
+\newcommand{\summary}[1]{
+\renewcommand{\maketitle}{%
+\flushleft\textsf{Ben Greenman \hfill \today} \\
+\textsf{CS 7480 Summary \hfill #1} \\
+\hrule
+\vspace{0.4cm}}
+\maketitle
+}
+
+\newcommand{\swtable}[2]{
+\vspace{0.5cm}
+\subsubsection*{Strengths}
+\begin{itemize}
+#1
+\end{itemize}
+\vspace{0.1cm}
+
+\subsubsection*{Weaknesses}
+\begin{itemize}
+#2
+\end{itemize}
+\vspace{0.1cm}
+}

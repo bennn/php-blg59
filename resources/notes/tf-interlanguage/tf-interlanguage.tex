@@ -1,0 +1,41 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Interlanguage Migration: From Scripts to Programs}
+
+The authors postulate a language with both untyped and statically-typed syntax; their main result is that in such a language, a program with exactly one typed module will never raise a runtime type error due to type-checked code~\cite{tf-interlanguage}.
+A secondary result is that the typed module will accurately report all runtime type errors caused by interaction with an untyped module.
+
+\qquad The paper describes interoperability and runtime type enforcement using higher-order contracts to specify the behavior of functions.
+Inferred contracts list the typed module's expectations for untyped identifiers, and compiled contracts protect type invariants in untyped code.
+
+
+\swtable{
+\item
+  The migration story is plausible.
+  (But wouldn't we be better off fully-typed from the beginning?)
+\item
+  The emphasis on preserving typed invariants \& the compiler from contracts to types are novel.
+}{
+\item The formalism in Section 2 should match the examples in Section 2.
+\item A ``philosophical assumption'' is missing: that the dynamically-typed language supports run-time, higher-order contracts.
+\item
+  The contract language is limited to match the type language.
+  One cannot write a faithful specification of functions like \texttt{square-root}~\cite{ff-contracts}.
+\item
+  Poor title.
+  Though, it surprisingly has more syllables than the authors' full names combined.
+}
+
+%\subsubsection*{Notes}
+%\begin{itemize}
+%\item
+% 
+%\end{itemize}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{tf-interlanguage}
+\end{document}

@@ -1,1 +1,9 @@
 todo.org
+
+*\.aux
+*\.blg
+*\.bbl
+*\.log
+*\.out
+*\.dvi
+*\.pdf
