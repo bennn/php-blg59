@@ -14,17 +14,43 @@ The benefits and drawbacks of each approach are clearly stated.
 \item
   Identifies the problem of defining \emph{type-preserving} semantics between higher-order languages.
 \item
-  Bold use of color.
+  Offers three reasonable solutions
+  and makes connections to pragmatic
+  industry solutions. Even the ``na\"ive'' lump embedding had practical
+  applications before this paper gave it a firm semantics.
 \item
-  Good motivation, includes many references to industry projects for language interop.
+  Bold use of color. This might be the paper's most enduring academic contribution.
 }{
 \item
-  The ML and Scheme languages are very similar.
-  How would this scale if ML added references or Scheme had \texttt{call/cc}?
+The Scheme and ML variants are very similar. Although the authors
+consider the problem of different integer encodings, real languages vary
+in many ways. For example:
+\begin{itemize}
 \item
-  Similarly, how about transitive interop?
-  Or even fixpoints?
-  But it makes sense to leave a full exploration of those design spaces to future work.
+ User-defined datatypes in one language may not have an obvious
+ encoding in another language. Can the (non-lump) semantics be
+ extended with user-defined encodings for these data structures,
+ and include a check that the encodings are isomorphisms?
+\item
+ Coq and Agda assume that all functions are pure and depend
+ heavily on this assumption. Languages like OCaml, however, are
+ stateful. This makes linking OCaml and Coq code potentially
+ dangerous. Can we extend the semantics with similar higher-level
+ properties?
+\item
+ Potentially non-terminating FFI calls can also violate one
+ language's invariants. For example, the LiquidHaskell language
+ uses an SMT solver to solve type-level equations, and must take
+ care to not send diverging variables to the constraint solver. It does
+ so by statically analyzing Haskell code. Could this paper's
+ semantics offer termination guarantees for FFI calls?
+\item
+ {\tt C} and {\tt C++} are plainly unsafe; they can read and write to arbitrary
+ memory locations. Is there hope for a semantics that rules out
+ memory model violations? At the very least, can we detect such
+ abuses? I'm imagining a C program that corrupts ML's
+ contract-checking code.
+\end{itemize}
 }
 
 \footnotesize
