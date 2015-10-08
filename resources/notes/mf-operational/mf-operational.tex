@@ -1,0 +1,33 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Operational Semantics for Multi-Language Programs}
+
+This paper gives semantics for language interoperability~\cite{mf-operational}.\footnote{The title is a complete description.}
+The presentation is divided into three sections: initially foreign values are considered opaque, next they are given meaning in a type system, and finally they are monitored by higher-order contracts.
+The benefits and drawbacks of each approach are clearly stated.
+
+
+\swtable{
+\item
+  Identifies the problem of defining \emph{type-preserving} semantics between higher-order languages.
+\item
+  Bold use of color.
+\item
+  Good motivation, includes many references to industry projects for language interop.
+}{
+\item
+  The ML and Scheme languages are very similar.
+  How would this scale if ML added references or Scheme had \texttt{call/cc}?
+\item
+  Similarly, how about transitive interop?
+  Or even fixpoints?
+  But it makes sense to leave a full exploration of those design spaces to future work.
+}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{mf-operational}
+\end{document}
