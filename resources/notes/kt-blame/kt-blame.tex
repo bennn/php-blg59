@@ -1,0 +1,47 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Blame Assignment for Higher-Order Contracts with Intersection and Union}
+
+The paper~\cite{kt-blame} formalizes the dual notions of subject and context blame soundness for languages with higher-order contracts.
+It also formalizes the contract analogues of union and intersection types and proves two sound monitoring strategies (assuming pure, terminating contracts).
+The authors explain monitoring for unions \& intersections in terms of a constraint graph data structure.
+
+\swtable{
+\item
+  The context soundness theorem is a wonderful contribution.
+  I think if I have some free time this winter I should try to reproduce it for more of the related work.
+
+  Also I appreciated their emphasis that contracts are meant to detect violations, not guarantee correctness.
+  Really, the whole formalism is very well done.
+\item
+  The examples were few, and always insightful.
+}{
+\item
+  Why mention $\mathsf{TreatJS}$ without a brief evaluation or link to the ECOOP paper?
+\item
+  The introductory sections are pretty technical.
+  If I wasn't already familiar with contracts from Racket \& the literature I would have a hard time understanding.
+\item
+  The paper was mostly very good about citing related work\textemdash except for effects!
+  Their theorems clearly do not hold for stateful or non-terminating contracts because of the backtracking needed to check intersection \& union contracts.
+  The authors should have mentioned this, and I would have liked to hear their ideas.
+
+  Their ECOOP paper on $\mathsf{TreatJS}$~\cite{kt-treat} uses sandboxing to limit some effects of contracts.
+  That's good, but what happens if a value satisfies the right clause of a disjunction but the contract system checks the left clause first and in doing so enters an infinite loop?
+
+  Sandboxes also don't address issues with state internal to contracts.
+  Suppose we had the affine contract $((A \rightarrow^1 B) \cap (A' \rightarrow^1 B))$ and a program that exercised both alternatives exactly once.
+  If I understand the authors' contract scheme, the first function application will trigger both affine flags.
+  Then the second call will fail.
+}
+
+% What is the double pipe in Fig 6?
+% -- those terms do not belong in the source
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{kt-blame}
+\end{document}
