@@ -1,0 +1,45 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Sound Modular Verification of C Code Executing in an Unverified Context}
+
+The authors dream of combining a fully-abstract compiler with protected-memory hardware to enable modular verification of C programs via separation logic.
+We readers are dazzled with a proof that static Hoare logic assertions are never invalidated \emph{at runtime} and impressive benchmark results ($<\!\!10\%$ overhead) from a closed-source OCaml binary.
+In all, a compelling work of fan fiction~\cite{ajp-sound}.
+
+\swtable{
+\item
+  Clever combination of features.
+  I hope that hardware designers soon give us a fast way to check memory integrity.
+\item
+  Very well-written introduction.
+}{
+\item
+  The references to (modular) verification tools were good motivation;
+   I would have also liked citations to companies using these tools.
+  Especially, I would have liked to know of companies writing high-security code
+   that still use ``untrusted'' code\textemdash either as a library or because they cannot afford complete verification.
+\item
+  The macro-benchmarks were not very convincing; {\tt gcc -O3} is far from fully-abstract!
+  More detailed Sancus results would have been more useful than the benchmarks in \S 7.2.
+\item
+  On that note, I don't think ``fast'' and ``fully-abstract'' will ever coexist.
+  The latter rules out too many of the optimizations.
+  Shame on these guys for trying to keep us programming in C~{\tt ;)}.
+\item
+  In \S 7.4, I don't understand how copying the memory region could be cheaper than hashing.
+  Is copying less expensive than multiplication? Maybe they need a faster (rolling) hash algorithm.
+\item
+  Blame is \emph{not} orthogonal to this work.
+  Part of their informal guarantee is that bugs triggered in unverified code are detected.
+  This idea of correctly blaming the unverified code should be formalized.
+}
+
+Who is P. W. O\&\#39;Hearn?
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{ajp-sound}
+\end{document}
