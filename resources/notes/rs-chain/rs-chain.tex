@@ -1,0 +1,35 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Chain Replication for Supporting High Throughput and Availability}
+
+Chain replication is a server protocol designed to give clients the illusion of a consistent, highly-available database~\cite{rs-chain}.
+Assuming that server failures can be detected immediately, the protocol can handle arbitrarily many server failures.
+Some client messages may be dropped and some responses may fail to reach the client, prompting the client to re-send a query or update, but the database remains consistent.
+
+The protocol works by organizing servers in a linear chain.
+Each server keeps a copy of the database.
+The last server in the chain receives queries and confirms updates.
+The first server in the chain performs updates and propogates results to its successor.
+The consistency invariant is that a server in the chain knows no more than its predecessor.\footnote{In the paper: if server $i$ is a predecessor of server $j$, then $\emph{Hist}^j \preccurlyeq \emph{Hist}^i$.}
+
+\swtable{
+\item
+  Clear argument, simple protocol, algorithms to handle failure at any location in the chain (or add a server to the chain).
+\item
+  Transient outages sound like a real problem for contemporary datastores.
+}{
+\item
+  Assumes fail-stop servers and an invincible master process.
+\item
+  Seems to require a lot of extra storage and communication time.
+  Besides recommending that the first server computes the \emph{value} to store and pass that (rather than a thunk) to successors, the authors do not suggest ways to reduce the amount of redundant information or transmit diffs instead of key/value pairs.
+
+}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{rs-chain}
+\end{document}
