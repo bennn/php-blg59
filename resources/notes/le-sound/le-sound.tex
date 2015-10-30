@@ -1,0 +1,32 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Sound Type-Dependent Syntactic Language Extension}
+
+Presents a framework for defining typed languages and extending them with syntactic sugar~\cite{le-sound}.
+The sugarings can extend the valid expressions and types of the language.
+
+All syntax extensions are guaranteed type-sound, and are typechecked before they elaborate into core syntax.
+Thus any type errors are caught early and presented to the user in terms of the surface syntax.
+
+\swtable{
+\item
+  Promotes (some form of) extensible type systems.
+\item
+  Preserves extensions' abstraction barriers, probably makes errors easy to debug.
+}{
+\item
+  Language extensions must be expressible in the core; growth is limited by the language you begin with.
+\item
+  The system is no help to existing languages.
+  Before a language can grow, it must be defined within the authors' framework.
+}
+
+Hmph, this makes me think macrotypes would've had a good shot at POPL.
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{le-sound}
+\end{document}
