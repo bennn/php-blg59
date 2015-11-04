@@ -1,0 +1,44 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{The Next 700 Programming Languages}
+
+Is this ``the first'' programming languages paper?
+Either way, Landin clarifies problems in language design~\cite{l-next}.
+He isolates two main components of a language definition:
+\begin{itemize}
+\item
+  \emph{Core forms}: the basic primitives available to language users.
+\item
+  \emph{Derived forms}: ways of expressing new forms or structures in terms of core forms.
+\end{itemize}
+Landin observes that the core forms really define a language, while the derived forms (or rather, the general machinery for building derived forms) are essentially the same across languages.
+Thus he advocates for families of languages that share derived forms but offer different core forms suited to a specific userbase.
+This is essential language design.
+
+\swtable{
+\item
+  The discussion of denotations and sub-languages with algebraic laws was interesting and very relevant today.
+  Theorem provers are one example; in that domain, the algebraic laws happen to enable very precise reasoning about program correctness.
+  I especially liked the comments at the end, in particular Strachey's:
+  \begin{itemize}
+  \item Instead of building little languages, we could use a technique for reasoning about imperative commands.
+  \item The imperative definition of matrix multiplication takes far too much detail\textemdash this makes refactoring and optimization difficult for computer and programmer alike.
+  \end{itemize}
+\item
+  Thank you, Peter J. Landin for wading through so many languages and reference manuals, then stepping back and identifying the common structure.
+}{
+\item
+  The ALGOL 60 report used BNF notation, and I wish Landin had done the same for the figure in Section 5.
+\item
+  Section 4 was unclear to me (perhaps, my own weakness) and I would have liked more clarification.
+\item
+  The discussion of ``relevant whitespace'' in the text and during the Q/A notes is silly, and it's a shame we have the same silly discussions today.
+}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{l-next}
+\end{document}
