@@ -1,0 +1,37 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{On the Criteria To Be Used in Decomposing Systems into Modules}
+
+The paper compares two methods of breaking a program into components:
+ the first is to divide the program into steps (or rather, a flowchart)
+ and the second is modularize related behaviors~\cite{p-criteria}.
+These strategies roughly correspond to imperative and functional programming.\footnote{There are hints of object-oriented programming, but the core idea is just of a module with a clear API of functions.}
+The argument is that the second method\textemdash of encapsulating design decisions and presenting abstract interfaces\textemdash is better from an engineering standpoint and sufficently motivating to inspire work on efficient compilation.
+
+
+\swtable{
+\item
+  Identifies and clearly states an important problem: how should we organize large software projects?
+\item
+  The \emph{Changeability} section raised interesting points.
+  Design decisions 2, 4, and 5 are still relevant (time/space tradeoffs).
+}{
+\item
+  The worked example is nice, but I would have liked more anecdotes from larger projects.
+\item
+  The paper does not deeply consider modularizing across a language, libraries, and user applications.
+  (Looking back, it's obvious that the programming language should provide abstractions for strings, character sets, and I/O.
+   User applications should \emph{never} provide these things.
+   At the very least, they belong in a library outside the ``system''.)
+}
+
+It's hard to imagine taking over a week to write a KWIC index.
+Also, why is ``KWIC index'' a keyword for the paper?
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{p-criteria}
+\end{document}
