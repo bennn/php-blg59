@@ -1,0 +1,33 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Product Lines of Theorems}
+
+Gives a framework for composable verification~\cite{dcb-product}.
+Proof scripts follow the same modular structure as the actual code, and compose in a similar manner.
+
+How do the proofs compose?
+Each component documents its assumptions in an interface.
+New components must satisfy this interface to work together.
+The approach is implemented in Coq by modeling the Java language.
+
+\swtable{
+\item
+  Suggests a discipline, not a particular framework or library.
+\item
+  Old proofs do not need to be re-checked as new features are added.
+}{
+\item
+  Proof assumptions need to find a sweet spot between generality and domain-specifics
+   because new features need to fit within these assumptions.
+  (Unless you go back and refactor.)
+\item
+  Need to work in Coq, and build your codebase from the ground up.
+}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{dcb-product}
+\end{document}
