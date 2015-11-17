@@ -1,0 +1,49 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{From System F to Typed Assembly Language}
+
+If the \emph{Sound Modular Verification} paper~\cite{ajp-sound} was fan fiction,
+ this is a type-theory pastoral~\cite{mwcg-from}.
+Suppose we kept type information all the way down to assembly.
+Not just {\tt int} vs. {\tt float} type information, but Reynolds-style syntactic discipline.
+Compilers could then optimize more aggressively and runtime systems could guarantee more safety properties.
+No more will the computer ``accept almost any sequence of instructions and make sense of them at its own level''~\cite{h-hints}; instead, stuck states will protect high-level invariants.
+Code will \emph{always} come with the specification it must follow.
+
+The article presents a 5-step, type-preserving translation from System F to a typed assembly language.
+Two of the passes are optimizations: hoisting and register allocation.
+
+\swtable{
+\item
+  This sounds great\textemdash especially the safety properites that annotated code provide.
+  What needs to happen for the world to start running typed assembly?
+  Do we need a Xavier to crank out a commercially-viable implementation?
+  A big security breach to motivate new hardware?
+  To be patient and wait 20 more years, until that 30-year sweet spot?
+  I wonder what the authors would say if we asked them today.
+\item
+  The running example program was very useful.
+}{
+\item
+  Once we pick a TAL, we will be stuck with it, just as we're stuck with x86 and ARM.
+  The authors don't seem to think the one here is right, based on their proposed research to eliminate array bounds checking.
+  What then, is the right language?
+  The paper doesn't give a strong opinion, nor does it talk about type checkers that accept more than one language (to ease migration from an implemented-now version to a better, future version)
+\item
+  How does code link?
+  I got that foreign binaries could be assumed type-correct, but the language didn't talk about modularity or foreign functions.
+  Are those really straightforward with TAL?
+  Do we need to re-typecheck all the code we link to, or is it impossible for an adversary to give a fake proof of type-correctness?
+\item
+  The big question: how slow is TAL?
+  How do the authors' experimental implementations run?
+  %I especially wonder about the toys.
+}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{mwcg-from}
+\end{document}
