@@ -1,0 +1,46 @@
+\section{Commercial Users of Verified Software}
+
+The biggest recent news about CompCert was its partnership with \href{http://www.absint.com/}{AbsInt}, a German company that sells static analysis tools.
+Xavier (and INRIA) is still in charge of CompCert research, but AbsInt now markets the compiler and provides technical support.
+AbsInt is also managing the CompCert \href{https://github.com/AbsInt/CompCert}{github repository}.
+
+Even before the AbsInt partnership, Airbus was using the CompCert compiler to develop software that flies planes.
+Previously, Airbus had used the DIAB compiler managed by \href{http://www.windriver.com/}{Wind River Systems}.
+Airbus programs are still run through the DIAB preprocessor, assembler, and linker\footnote{\href{https://en.wikipedia.org/wiki/Dataindustrier\_AB}{DIAB} has been around for over 25 years.}
+ but CompCert's verified optimizations made it a better choice than the DIAB compiler.
+As of February 2014, Airbus reported a 12\% improvement in worst-case execution time as a result of using CompCert~\cite{airbus-slides}.
+
+Providing safety guarantees for critical software was CompCert's goal from the beginning, but the partnerships raise an interesting question:
+ should academic research strive to make a commercial partnership?
+Is there any other way to measure overall research impact than by commercial adoption?
+
+Related point: CompCert is a giant engineering effort.
+Many people believed, back in 200X, that it might be possible to write a compiler in Coq.
+But that belief was not making embedded systems any safer.
+Xavier made it his \emph{research} agenda to build a certified compiler.
+Was that a good use of time, or should ``implementation details'' be left to the industry folks?
+
+
+To give two more examples of academia-to-industry projects:
+
+
+\subsection{Separation Logic}
+
+John Reynolds and Peter O'Hearn worked for years on developing a logic to express memory constraints.
+In 2009, Peter O'Hearn founded a startup, \href{https://www.crunchbase.com/organization/monoidics#/entity}{Monoidics}, to build static analysis tools using the ideas from separation logic.
+Monoidics was \href{http://www.telegraph.co.uk/technology/facebook/10188628/Facebook-buys-UK-startup-Monoidics.html}{bought by Facebook}
+ in 2013 and now the company's \href{https://github.com/facebook/infer}{tools} are validating the Android apps that Facebook \href{https://code.facebook.com/posts/1648953042007882/open-sourcing-facebook-infer-identify-bugs-before-you-ship/}{publishes every month}.
+
+John Reynolds would have never implemented separation logic.
+Would we, or should we, think less of the research if it was not being used in practice?
+
+
+\subsection{GNU NYU Ada Interpreter (GNAT)}
+
+In 1992, NYU entered a contract with the US Air Force to write an Ada compiler.
+Ada was, and still is, a popular language for high-assurance software due to its stong type system and low-level capabilities.
+At any rate, the NYU team built both a compiler and an IDE for Ada.
+The project is now managed by a successful company, \href{http://www.adacore.com/}{AdaCore}.
+
+Ada and C are less glamorous than Coq, OCaml, or Haskell.
+But they arguably have more \emph{impact} on real software.

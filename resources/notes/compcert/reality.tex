@@ -1,0 +1,196 @@
+\section{Real World, Real Compiler}
+
+Debugging is always a bummer.
+This is especially true if buggy software starts losing money, releasing secrets, or killing people.
+Hence the push for verified software: let's get it right the first time.
+
+Embedded systems is a large application area where mistakes can be fatal.
+Airplanes, automobiles, construction equipment, spaceships, and the like all run embedded systems.
+Embedded systems have another constraint: the programs must follow a strict resource limit.
+For these reasons, the C programming language is commonly used in embedded systems because of its proximity to the hardware and portability.
+
+Debugging embedded systems code is very difficult.
+The CompCert C compiler offers an efficient, optimizing, and safe C compiler~\cite{l-verified}.
+CompCert claims that if it compiles a program, the executable will only perform only a subset of the actions one would expect the source code to perform.
+This guarantee does not eliminate debugging\textemdash nor does it specify execution time or memory consumption\footnote{In practice, CompCert seems reasonably time and space efficient~\cite{website,airbus-slides}}\textemdash but it at least rules out translation bugs, thereby encouraging source-program reasoning.
+
+High-assurance software is an old idea.
+The UK-based Motor Industry Software Reliability Association maintains a specification for safe C programming~\cite{misra-spec}.
+Languages like Rust (2009), Go (2007), and Ada (1977) are alternative low-level languages with stronger correctness guaranatees.
+Companies like Wind River\footnote{http://www.windriver.com/} sell high-assurance tools, including the optimizing DIAB compiler toolchain for C.
+Airbus has been operating \emph{fly-by-wire} planes since the 1987 release of the A320 line; more recently in Boeing released the fly-by-wire 777 in 1994 and the 787 in 2009.
+These aircraft and their military predecessors were certainly running ``verified'' software\textemdash most likely manually-validated assembly~\cite{}.
+
+Within the design space of high-assurance code, CompCert is the first \emph{formally verified} C compiler, in the sense that much of the compiler is written and proven correct in the Coq proof assistant.\footnote{The appendix in \secref{coq} gives a very short introduction to Coq.}
+Whether to trust Coq more than a carefully-developed C program is a personal decision (see \secref{guarantees}), but the CompCert compiler is arguably more optimizing, extensible, and maintainable than previous verified compilers~\cite{airbus-slides}.
+
+
+\subsection{Source Languages}
+
+CompCert supports most of the {\bf ANSI C} and {\bf ISO-C-99} standards.
+{\bf ANSI C} refers to the American standard published in 1990~\cite{ansi-c}.
+{\bf ISO-C-99} refers to the international standard, published in 1999~\cite{iso-c99}.
+(Suffice to say, these are widely used programming languages.)
+We will make reference to {\bf ISO-C-99} as C99 throughout.
+
+\subsubsection{Details and Caveats}
+CompCert does not accept the entire C99 standard.
+These are the most interesting exceptions and design details, as documented in Chapter 5 of the CompCert reference manual~\cite{refman}.
+
+%% TODO double-check tense and suchthings
+\begin{itemize}
+\item
+  CompCert follows the \emph{hosted environment} model, using the standard library of the target system.
+  C99 defines a hosted implementation as one that accepts any strictly-conforming program~\cite{iso-c99}.
+  In contrast, a \emph{free-standing} implementation can reject programs that use standard headers other than
+   {\tt float.h, iso646.h, limits.h, stdarg.h, stdbool.h, stddef.h,}~and~{\tt stdint.h}.
+\item
+  Programs must be sequential.
+  No {\tt pthreads}!
+\item
+  Preprocessing is done externally, by the system C compiler.
+\item
+  Multibyte characters are not allowed in source code; for example $\lambda$.
+  %% This is technically a break from the standard.
+  %% C99 states that the first translation stage of a source program should map multibyte characters to the source character set in an implementation-defined manner~\cite{iso-c99}.
+\item
+  The {\tt long double} type\footnote{CompCert can accept {\tt long double} as a synonym for {\tt double}. This compiles with C99, but may conflict with other binaries on some platforms.} and functions returning struct or union types are not allowed by default.
+\item
+  Complex types (like {\tt double \_Complex}) and variable-length arrays are not supported.
+\item
+  The {\tt restrict} keyword is ignored.
+  Normally, this keyword marks a variable as the exclusive accessor for its underlying object.
+\item
+  The {\tt switch} statement is the same from Java and Misra-C~\cite{java-spec,misra-spec}.
+  In particular, Duff's Device is not allowed (see \appref{A} for a definition).
+\item
+  The {\tt asm} statement (for inline assembly) may be enabled with a flag, and may be used to invalidate correctness guarantees.
+\item
+  The {\tt \_Alignof} and {\tt \_Alignas} operators from {\bf ISO-C-2011} are supported.
+\item
+  CompCert assumes that {\tt setjmp} and {\tt longjmp} respect control flow.
+  All local variables that are live across an invocation of {\tt setjmp} must be declared {\tt volatile} to avoid mis-optimization~\cite{refman}.
+\item
+  The bit-level representation of integers and floats is exposed, but pointers are opaque 32-bit words.
+\item
+  Integers follow the ILP32LL64~\cite{ilp32ll64} model and floats follow the IEEE-754-2008~\cite{ieee-754} standard.
+  To paraphrase, arithmetic must be done with infinite precision and finally rounded to a machine-dependent precision when stored to a variable.
+\item
+  The compiler will optimize floating point operations assuming that all floats are rounded to the nearest representable number, with ties broken by rounding to an even mantissa.
+  Use a flag to disable this optimization if the rounding technique will change at runtime.
+  %% ({\tt volatile} declares a variable as mutable)
+\item
+  The compiler will \emph{not} implicitly reorder floating-point computations.
+  Operators like fused multiply-add are available as primitives and must be called explicitly.
+\end{itemize}
+
+Programs written in C are preprocessed, parsed, type-checked, and elaborated into the Clight language, for which CompCert has formal semantics.
+
+
+\subsection{Target Languages}
+
+CompCert provides 3 code generators~\cite{refman}:
+
+\begin{itemize}
+\item PowerPC 32 bits (all models)
+\item ARM v6 and above with VFP coprocessor (for floating-point arithmetic)
+\item Intel/AMD x86 in 32-bit mode, with SSE2 extension (for integer-vector operations)
+\end{itemize}
+
+PowerPC is supported on all 32-bit Linux distributions.
+ARM is supported on Debian \& Ubuntu Linux (the {\tt armel} and {\tt armhf} architectures.
+x86 works on all 32-bit and all 64-bit-emulating-32-bit Linux distributions, along with MacOS $\ge\!10.6$ and Windows via Cygwin.
+The specific application binary interfaces and related limitations are documented in the reference manual~\cite{refman}.
+
+
+\subsection{Compiler Structure}
+
+CompCert is implemented in 25 passes~\cite{refman}.
+The first 3 are pre-processing: these convert C source code to CompCert C syntax.
+The next 19 are the compiler back-end, including 8 optimizing passes.
+%% POPL'06 :
+%%  (~6 passes) cminor -> internal cminor -> rtl -> ltl -> linear -> mach -> powerpc 
+%% FM'06 :
+%%  (~2 passes) clight -> cminor
+The final 3 convert ASM syntax trees to raw assembly code, assemble an object file, and link to create an executable.
+
+Of these passes, the parsing pass and 15 back-end passes are implemented and verified in Coq~\cite{refman}.
+These constitute 90\% of the compiler.
+File inclusion, macro expansion, conditional compilation, and other pre-processing steps are handled by an external C preprocessor.
+Assembling and linking are also handled externally; however, PowerPC users can use the {\tt checklink} tool to assert basic properties about the linked code (i.e., linking did not remove any code blocks).
+
+
+\subsubsection{Optimizing Passes}
+These are the main optimizations, listed in the order that they appear as compiler passes.
+See \secref{passes} for details.
+
+\begin{multicols}{2}
+\begin{enumerate}
+\item Instruction selection
+\item Tail call elimination
+\item Function inlininng
+\item Constant propogation
+\item Common subexpression elimination
+\item Dead code elimination
+\item Branch tunneling
+\item Register allocation
+\end{enumerate}
+\end{multicols}
+
+The compiler does not perform any loop optimizations~\cite{refman}.
+No hoisting, no reordering, no unrolling.
+
+
+\subsection{Guarantees}
+\label{sec:guarantees}
+
+The compiler correctness theorem states, informally,\footnote{\secref{terminology} introduces necessary terminology and \secref{correctness} formally states the correctness theorem.}
+ that compiled code \emph{refines} the \emph{behavior} of source code~\cite{refman}.
+By \emph{refines}, we mean that all compiled behaviors are observable source behaviors with the exception that compiled code may eliminate dead code that caused the source code to diverge.
+By \emph{behavior}, we mean the trace of all I/O and volatile (read: mutable) operations plus the program's exit code, if any.
+
+The behavior of source and compiled code is specified in terms of the languages' formal semantics.
+As C99 does not have a formal semantics, much less one implemented in Coq, we cannot even state a whole-compiler correctness theorem.
+Current research aims to fix this issue~\cite{k-standard,klw-formal}.
+
+
+\subsubsection{Why should we trust Coq?}
+
+CompCert's correctness theorem is stated and proved in Coq.
+If Coq is incorrect, then the theorem does not hold.
+However:
+\begin{itemize}
+\item The Coq developers believe in Coq
+\item The CompCert developers believe in Coq
+\item The Airbus team believes in CompCert
+\item John Regehr hasn't been able to break CompCert
+\end{itemize}
+
+% So we have some reason to believe that the Coq is correct, just as we can believe that the sun will rise tomorrow.
+
+Speaking of John Regehr, his group famously wrote in their PLDI'11 paper~\cite{ycer-finding}:
+\begin{quote}
+  ``The striking thing about our CompCert results is that the middle end bugs we found in all other compilers are absent.
+  As of early 2011, the under-development version of CompCert is the only compiler we have tested for which Csmith cannot find wrong-code errors.
+  This is not for lack of trying: we have devoted about six CPU-years to the task.
+  The apparent unbreakability of CompCert supports a strong argument that developing compiler optimizations within a proof framework, where safety checks are explicit and machine-checked, has tangible benefits for compiler users.''
+\end{quote}
+
+More recent bug-finding tools~\cite{las-compiler} have been unable to break the verified portions of CompCert as well.
+Even if we do not fully trust Coq, we should at least prefer it over hand-validated C. 
+
+
+\subsection{Installing CompCert}
+
+CompCert is not free software, but a \href{https://github.com/AbsInt/CompCert}{non-commercial version} is on Github for ``educational, research or evaluation purposes only''.
+After cloning the repository:
+\begin{enumerate}
+\item {\tt ./configure ia32-linux} \\
+      (MacOS and Cygwin users: change to {\tt ia32-macosx} or {\tt ia32-cygwin})
+\item {\tt make}
+\item {\tt make install}
+\end{enumerate}
+
+You can then compile a program using the {\tt ccomp} executable.
+The interface to {\tt ccomp} is nearly the same as {\tt gcc}, only restricted to the options that CompCert implements.
+

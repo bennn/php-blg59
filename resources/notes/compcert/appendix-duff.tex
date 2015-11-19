@@ -1,0 +1,32 @@
+\section*{Appendix A: Duff's Device}
+\label{app:A}
+
+Here is Duff's Device, copied from Wikipedia.\footnote{\url{https://en.wikipedia.org/wiki/Duff\%27s\_device}}
+CompCert will not compile this program.
+
+\begin{lstlisting}
+int n = (count + 3) / 4;
+switch (count % 4) {
+case 0: do { *to = *from++;
+case 3:      *to = *from++;
+case 2:      *to = *from++;
+case 1:      *to = *from++;
+        } while (--n > 0);
+}
+\end{lstlisting}
+
+The device is an optimized version of a typical do/while loop, performing up to 4 operations between branches.
+
+\begin{lstlisting}
+do {
+    *to = *from++;
+} while(--count > 0);
+\end{lstlisting}
+
+The trick is interleaving the \lstinline{do} statement with the cases in the \lstinline{switch} statement.
+At the beginning, when the \lstinline{switch} condition is evaluated, control jumps to the middle of the case statements depending on the value of \lstinline{(count % 4)}.
+Control falls through one \lstinline{case} to the next, so upon reaching the \lstinline{while} condition the number of items left in \lstinline{from} is divisible by 4.
+If the number is non-zero, we jump to the top of the \lstinline{do} statement, perform 4 copies, and repeat the check.
+
+This is sneaky and controversial code.
+One could argue that this is useful code, but MISRA-C and CompCert reject it.

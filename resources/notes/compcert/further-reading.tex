@@ -1,0 +1,142 @@
+\section{Learn More}
+
+%% \subsection{Conference Proceedings}
+%% A timeline:
+
+%% \begin{tabular}{l l}
+%%   2006 & backend, frontend
+%% \\     & coinductive opsem
+%% \\     & optimizations based on dataflow
+%% \\2007 & list-machine benchmark
+%% \\     & zenon prover
+%% \\     & cps transformations
+%% \\     & separation logic for cminor
+%% \\2008 & translation validators
+%% \\2009 & faster coalescing
+%% \\     & lazy code motion
+%% \\2010 & regalloc and splitting
+%% \\     & pipelining validator
+%% \\2011 & flight controllers
+%% \\2012 & alias analysis
+%% \\     & lr1 parsers
+%% \\     & optimized flight controllers
+%% \\2013 & floating points (make section)
+%% \end{tabular}
+
+%% \subsection{Coinductive Opsem}
+%% bigstep preferred, but cannot do nontermination~\cite{l-coinductive}.
+%% Coinductive definitions and theorems.
+
+%% \subsection{Dataflow Analysis}
+%% %% http://gallium.inria.fr/~xleroy/publi/proofs_dataflow_optimizations.pdf
+%% Optimizations as instances of dataflow problems~\cite{bgl-structured}.
+%% General functor, uses Kildall's algorithm.
+
+%% %% TODO where in source?
+%% \begin{lstlisting}
+%% (* F       = Function declarations
+%%  * Map.A B = Map from keys of type A to values of type B
+%%  *)
+%% Module Type ANALYSIS.
+%%   Parameter D : Set.
+%%   (* The domain of the analysis *)
+%%   Parameter A_f : F -> Map.T D.
+%%   (* Analysis function; computes domain properties of
+%%    * program points in the function F. *)
+%%   Parameter A_P : D -> S -> Prop.
+%%   (* Compatibility of concrete states in S with domain elements *)
+%%   Parameter A_{entry} : \forall f S, A_P(A_F(f_{ep}), S).
+%%   (* All states should be compatible with their abstract entry point *)
+%%   Parameter A_{correct} : \forall f c1 c2 S1 S2,
+%%     c1 \in f_c => (S1, f_C(c1)) \mapsto (S2, c2) => A_P(A_F(c1), S1) => A_P(A_F(c2), S2)
+%%   (* All computation steps c1->c2 should map to compatible states
+%% \end{lstlisting}
+
+%% Kildall : initially compute D for each program point.
+%%   Update successors with their bound joined with the current node.
+%%   Reach fixedpoint because graph is finite and lattice is well-founded
+
+%% (best to describe the 3 optimzations, then talk about Kildall for how-to-prove)
+
+
+%% \subsection{List Machine}
+%% %% http://gallium.inria.fr/~xleroy/publi/listmachine-lfmtp.pdf
+%% Benchmark, appel + leroy
+%% A second poplmark.
+%% Not immediately interesting.
+
+
+%% \subsection{Zenon Prover}
+%% Based on tableau method
+%% first-order logic with equality
+%% for Focal environment, doing OCaml for execution and Coq for certification
+%% seems to be going too slowly
+
+
+%% \subsection{Separation Logic for Cminor}
+%% %% http://www.ensiie.fr/~blazy/AppelBlazy07.pdf
+%% Modifications to Cminor.
+%% Just read the source.
+
+
+%% \subsection{Formal Verification of Translation Validators}
+%% %% http://gallium.inria.fr/~xleroy/publi/validation-scheduling.pdf
+%% mach optimizations? re-check when doing passes
+
+
+%% \subsection{Verified Validation of Lazy Code Motion}
+%% %% http://gallium.inria.fr/~xleroy/publi/validation-LCM.pdf
+%% Apparently not part of public CompCert.
+%% Oh wait, entails CSE and hoisting
+
+
+%% \subsection{Flight control}
+%% %% https://hal.archives-ouvertes.fr/inria-00551370/document
+%% %% https://hal.inria.fr/hal-00653367/document
+%% Kind of interesting, standards requirements flowcharts
+
+%% \subsection{Floating Point}
+%% %% https://hal.inria.fr/hal-00743090v2/document
+
+
+\subsection{OPLSS Tutorial}
+
+In \href{http://gallium.inria.fr/~xleroy/courses/Eugene-2011/}{2011}
+ and \href{http://gallium.inria.fr/~xleroy/courses/Eugene-2012/}{2012},
+ Xavier Leroy taught a short course on verified compilers at the Oregon Programming Languages Summer School.\footnote{\url{https://www.cs.uoregon.edu/research/summerschool/}}
+The course presents a small compiler for the IMP programming language and proves a few optimizations.\footnote{As formalized in the Software Foundations textbook.~\cite{pcgghsy-software}}
+To summarize:
+\begin{itemize}
+\item
+  The source language has assignment statements, if statements, and while loops.
+\item
+  The target language is a JVM-inspired stack language.
+\item
+  Basic compiler correctness follows from two theorems.
+  \begin{itemize}
+  \item If the source program terminates in state $\sigma$, then the compiled code will also terminate in $\sigma$.\footnote{A state is just a map from identifiers to variables. Source and target code use the same representation for states.}
+    
+  \item If the source program diverges, then so does the compiled code.
+  \end{itemize}
+\item
+  Dead-code elimination ({\tt dce}) is implemented by approximating the live variables in a program and removing all assignments to dead variables.
+  (This is a source-to-source translation.)
+  A correct {\tt dce} pass ensures that optimized programs produce ``the same'' result state as un-optimized programs, where ``the same'' means two states hold the same values for all live variables.
+  \begin{lstlisting}[style=Coq]
+  Theorem dce_correct_terminating:
+    forall st c st', c / st || st' ->
+    (* Program `c` started in state `st` evaulates to state `st'` *)
+    forall L st1,               (* `L` is a set of live variables *)
+    agree (live c L) st st1 ->  (* `live` computes a fixpoint of `L` *)
+    exists st1', dce c L / st1 || st1' /\ agree L st' st1'.
+  \end{lstlisting}
+  For diverging programs, the correctness theorem includes a well-founded measure on commands and uses small-step semantics.
+  Then an instruction either progresses to a new state or deducts from the measure.
+\item
+  Register allocation is validated; the compiler checks that mapping on variables preserves semantics, taking special cases into account.
+  (An external program should compute the allocation, but this is not part of the material.)
+  To make register allocation and dead-code elimination compose, the statement of {\tt agree} is generalized over a valid map between variables.
+\item
+  Two static analyzers are implemented\textemdash one simple, the other with widening and inverse analysis of arithmetic and boolean operations.
+  These analyzers are proven sound, and then used to implement constant propogation.
+\end{itemize}

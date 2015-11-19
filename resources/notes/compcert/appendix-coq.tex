@@ -1,0 +1,56 @@
+\section*{Appendix B: Coq}
+\label{sec:coq}
+
+The Coq proof assistant is built on the principle of \emph{propositions as types}.
+A type specification in Coq is taken as a proposition, and a well-typed program is the corresponding proof.
+
+This economy of concepts makes for a very powerful base language, but practical Coq programs are normally divided among conventional-looking programs and propositions about their correctness.
+The propositions are shown correct in a so-called \emph{tactic language} designed to make writing proof terms easy.
+
+Here is a sample Coq interaction that states and proves a few properties of the natural numbers.
+Coq includes many tools to make interactions like these easier, but hopefully the code gives a sense of the effort and lines-of-code vs. lines-of-proof breakdown required to develop CompCert.
+(Imagine specifying pointer and floating-point arithmetic!)
+
+\begin{lstlisting}[style=Coq]
+Inductive natural :=
+  Zero : natural
+| Add1 : natural -> natural.
+
+Definition two  := Add1 (Add1 Zero).
+Definition four := Add1 (Add1 (Add1 (Add1 Zero))).
+
+Fixpoint plus (n1 : natural) (n2 : natural) : natural :=
+  match n1 with
+    | Zero => n2
+    | Add1 n1' => Add1 (plus n1' n2)
+  end.
+
+Example two_and_two_make_four : plus two two = four.
+Proof. auto. Qed.
+
+Lemma plus_Zero_left : forall (n : natural), plus Zero n = n.
+Proof. auto. Qed.
+
+Lemma plus_Zero_right : forall (n : natural), plus n Zero = n.
+Proof. induction n.
+       auto.
+       simpl. rewrite -> IHn. auto. Qed.
+
+Lemma plus_associative :
+  forall (n1 n2 n3 : natural), (plus (plus n1 n2) n3) = plus n1 (plus n2 n3).
+Proof. intros n1 n2 n3. induction n1.
+       auto.
+       simpl. rewrite -> IHn1. auto. Qed.
+
+Lemma plus_Add1_r :
+  forall (n1 n2 : natural), plus n1 (Add1 n2) = Add1 (plus n1 n2).
+Proof. intros n1 n2. induction n1.
+       auto.
+       simpl. rewrite -> IHn1. auto. Qed.
+
+Lemma plus_commutative :
+  forall (n1 n2 : natural), plus n1 n2 = plus n2 n1.
+Proof. intros n1 n2. induction n1.
+       rewrite -> plus_Zero_left. rewrite -> plus_Zero_right. auto.
+       simpl. rewrite -> IHn1. rewrite -> plus_Add1_r. auto. Qed.
+\end{lstlisting}

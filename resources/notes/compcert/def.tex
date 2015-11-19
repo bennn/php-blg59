@@ -1,0 +1,137 @@
+\usepackage{palatino}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{bbold}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{multicol}
+\usepackage[margin=1in]{geometry}
+\usepackage[colorlinks=true,citecolor=blue]{hyperref}
+
+\renewcommand{\maketitle}{{\flushleft\large\textsf{Ben Greenman \hfill CompCert Overview \\ 2015-11-19 \\\vspace{1mm}\hrule}}}
+
+\lstset{
+  %% backgroundcolor=\color{white},
+  alsoletter={&},
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  commentstyle=\color{red},
+  escapeinside={\%*}{*)},
+  %frame=single,
+  keywordstyle=\color{blue},
+  basicstyle=\ttfamily,
+  %% identifierstyle=\color{green},
+  language=C,
+  %% numbers=left,
+  %% numbersep=5pt,
+  numberstyle=\color{black},
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  %% stepnumber=5,
+  tabsize=2,
+  title=\lstname
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% For Typesetting Coq %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{lightgray}{rgb}{.9,.9,.9}
+\definecolor{darkgray}{rgb}{.4,.4,.4}
+
+%% A minimal definition of the Coq language
+\lstdefinestyle{Coq}{
+  %% Gallina Keywords
+  keywords = {
+    _,
+    as,
+    at,
+    cofix,
+    else,
+    end,
+    exists,
+    exists2,
+    fix,
+    for,
+    forall,
+    fun,
+    if,
+    IF,
+    in,
+    let,
+    match,
+    mod,
+    Prop,
+    return,
+    Set,
+    then,
+    Type,
+    using,
+    where,
+    with
+  }
+  sensitive    = true,
+  keywordstyle = \color{black}\bfseries,
+  %% Keywords for the Vernacular
+  ndkeywords   = {
+    Axiom,
+    Conjecture,
+    Parameter,
+    Parameters,
+    Variable,
+    Variables,
+    Hypothesis,
+    Hypotheses,
+    Definition,
+    Let,
+    Inductive,
+    CoInductive,
+    Fixpoint,
+    CoFixpoint,
+    Theorem,
+    Lemma,
+    Remark,
+    Fact,
+    Corollary,
+    Program,
+    Proposition,
+    Example,
+    Proof,
+    Qed,
+    Admit,
+    Admitted
+  }
+  ndkeywordstyle  = \color{black}{\bfseries},
+  identifierstyle = \color{black},
+  morecomment     = [s]{(*}{*)},
+  commentstyle    = \color{red}\ttfamily,
+  stringstyle     = \color{darkgray}\ttfamily,
+  morestring      = [b]',
+  morestring      = [b]"
+}
+
+%% \lstnewenvironment{coq}{}{}
+
+\newcommand{\secref}[1]{Section~\ref{sec:#1}}
+\newcommand{\appref}[1]{Appendix~\ref{app:#1}}
+\newcommand{\figref}[1]{Figure~\ref{fig:#1}}
+\newcommand{\fmtlang}[1]{\mathbf{#1}}
+\newcommand{\srclang}{\fmtlang{S}}
+%% \newcommand{\intlang}{\fmtlang{B}}
+\newcommand{\tgtlang}{\fmtlang{T}}
+
+\newcommand{\fmtprog}[1]{\mathbf{#1}}
+\newcommand{\srcprog}{\fmtprog{s}}
+%% \newcommand{\intprog}{\fmtprog{b}}
+\newcommand{\tgtprog}{\fmtprog{t}}
+\newcommand{\compil}{\mathbb{C}}
+
+\newcommand{\intel}{{\tt ia-32}}
+\newcommand{\becomes}{\hspace{1cm}{ becomes ... }\hspace{1cm}}
+\newcommand{\stepsto}[3]{\raisebox{-1ex}{\begin{tikzpicture}\node (0) {$#1$}; \node(1)[right of=0,xshift=1cm]{$#2$}; \draw[->] (0) -- node[above]{$#3$} (1);\end{tikzpicture}}}
+\newcommand{\stepstoplus}[3]{\raisebox{-1ex}{\begin{tikzpicture}\node (0) {$#1$}; \node(1)[right of=0,xshift=1cm]{${}^+#2$}; \node(2)[left of=1,xshift=3mm]{$$}; \draw[->] (0) -- node[above]{$#3$} (1);\end{tikzpicture}}}
+
+\newcommand{\bisim}{R}
+\newcommand{\fwdsim}{{\bisim_\rightarrow}}
+\newcommand{\backsim}{{\bisim_\leftarrow}}
+\newcommand{\valid}{\mathbb{V}}
