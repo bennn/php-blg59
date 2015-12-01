@@ -1,0 +1,40 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+\usepackage{amsmath}
+\usepackage{stmaryrd}
+
+\begin{document}
+\summary{Verifying an Open Compiler Using Multi-Language Semantics}
+
+Uses logical relations to state and prove compiler correctness for \emph{open} programs i.e. programs that reference code in other programs~\cite{pa-verifying}.
+The logical relations leverage the type systems of source, target, and intermediate languages to guarantee the semantics of programs assembled from various components.
+The paper's verified compiler preserves type soundness across compiler and linker passes.
+
+
+
+\swtable{
+\item
+  Formally states the problem of open-compiler correctness.
+\item
+  The paper's guarantees hold even if the linked-to programs are compiled by an unverified compiler, a compiler for a different language, or exist only in the target language.
+\item
+  The compiler correctness proof technique works for single- or multi-pass compilers.
+\item
+  Examples include \emph{more expressive} target languages and typed closure conversion.
+}{
+\item
+  Compiler correctness is for expressions and linking is modeled directly as substitution.
+  But real compilers operate on programs and real linkers do more work than just substitution\textemdash linkers build new programs and are just as prone to errors as real compilers.
+  Formalizing exactly what a linker like {\tt gcc}'s does is an important and (somewhat) interesting problem.
+\item
+  The admissibility requirements are pretty heavy.
+  It's not totally unreasonable to have the user instantiate both $\rho$ and $\mathcal{V}\llbracket\cdot\rrbracket\rho$, but it would be good to narrow the latter requirement down to specific properties.
+\item
+  The verified compiler only exists on paper.
+}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{pa-verifying}
+\end{document}
