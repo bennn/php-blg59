@@ -1,0 +1,247 @@
+\documentclass{article}
+
+\input{../def}
+
+\begin{document}
+\summary{Call-By-Name, Call-By-Value, and the $\lambda$ Calculus}
+
+\begin{abstract}
+  Plotkin's 1975 paper is strictly business.
+  There are many theorems packed in the space of 35 pages, with little room for discussion, conclusions, and related/future work.
+  This document provides a modern summary.
+\end{abstract}
+
+
+\section{Historical Context}
+Plokin's \emph{Call-By-Name, Call-By-Value, and the $\lambda$ Calculus}~\cite{p-call} appeared 10 years after Peter J. Landin's \emph{The Next 700 Programming Languages}~\cite{l-next},
+ 11 years after the publication of the ALGOL-60 report,
+ and 39 years after Alonzo Church published \emph{An Unsolvable Problem of Elementary Number Theory}~\cite{c-unsolvable}.
+The significance of these works, in order of their appearance, was:
+\begin{itemize}
+\item
+  Church's work introduced the $\lambda$ calculus: a useful notation for reasoning about computable functions.
+\item
+  The ALGOL-60 report gives a clean definition and semantics for a programming language.
+  ALGOL-60 was implemented.
+  You could run it on a variety of machines.
+\item
+  Landin noticed a strong connection between languages like ALGOL-60 and the $\lambda$-calculus.
+  His paper suggested using calculi to influence language design and gave a language called ISWIM to demonstrate.
+\item
+  Plotkin formalized the correspondence between $\lambda$ and ISWIM.
+  Additionally, Plotkin proved one method of simulating a call-by-value $\lambda$-calculus with a call-by-name one, and other method in the opposite direction.
+\end{itemize}
+
+
+\emph{Offhand comment}: Building connections is an important part of science, and especially computer science.
+The Church-Turing thesis unified different models of computation.
+This work by Plotkin unified language calculi with language implementations \emph{and} by-name and by-value reduction semantics.
+Nowadays, the main source of connections is the propositions-as-types principle; we are slowly unifying type theory, logic, and category theory.
+
+
+\section{Results I: Lifting Computer Science}
+
+Before 1975, there were distinctly 2 kinds of PL researchers.
+Computer scientists built languages and proved properties of their implementation.
+Mathematicians worked in a formal system like the $\lambda$ calculus and proved theorems that could ostensibly apply to any programming language.
+Plotkin elevated the meaning of ``computer science'' to include a possible formal system.
+Any theorems proven in the (below) calculus will definitely hold for the implementation.
+
+\subsection{ISWIM}
+
+Landin's programming language ISWIM is the starting point.
+This is a language we hope to reason about.
+ISWIM is defined using a set of basic constants, a function \textsc{Constapply} from pairs of constants to terms, and the SECD abstract machine~\cite{l-mechanical} (Figure~\ref{fig:secd}).
+
+Basic constants describe the core forms of the programming language, independent of the forms a programmer can define.
+These might include machine integers and I/O system calls.
+The special symbol {\bf ap} is used internally by the machine's transition function, $\Rightarrow$.
+
+\begin{figure}[ht]
+  \begin{align*}
+    \emph{Machine State}   &= \langle S, E, C, D \rangle
+  \\\emph{Stack} (S)       &= \emph{Closure}^*
+  \\\emph{Environment} (E) &= (\emph{Variable}, \emph{Closure})^*
+  \\\emph{Control} (C)     &= (\emph{Term} \cup {\bf ap})^*
+  \\\emph{Dump} (D)        &= \emph{Machine State}^*
+  \\
+  \\\emph{Closure} (Cl)    &= \langle M, E \rangle 
+  \\\emph{Constants}       &= a,b,\ldots
+  \\\emph{Term} (M,N)      &= x \mid a \mid \lambda\,x.\,M \mid M~N
+  \\\emph{Variable}        &= x,y,z,\ldots
+  \end{align*}
+
+  \begin{quote}
+    \emph{Side condition}: for all closures $\langle M, E \rangle$, the free variables in the term $M$ must be assigned values in the environment $E$.
+  \end{quote}
+  
+  \begin{align*}
+    \emph{Eval(M) = N} \iff& \emph{Load}(M) \Rightarrow D \mbox{ and } \emph{Unload}(D) = N
+  \\\emph{Load}(M) =& \langle {\bf nil}, \emptyset, M, {\bf nil} \rangle
+  \\\Rightarrow~~  =& \mbox{(omitted, see {\bf Section 3} of the paper)}
+  \\\emph{Unload}(\langle Cl, \emptyset, {\bf nil}, {\bf nil}\rangle) =& \emph{Real}(Cl)
+  \end{align*}
+
+  \begin{quote}
+    The function \emph{Real} converts a closure to a term by replacing all free variables in a closure's term with corresponding values from the closure's environment.
+  \end{quote}
+\label{fig:secd}
+\caption{The SECD machine. Sextiles (*) denote sequences.}
+\end{figure}
+
+This machine is what would run on the hardware; it is the low-level implementation of a programming language.
+Researchers could work directly with an implementation like this (and many do), but it is convenient to ``elevate'' the state of affairs and allow reasoning about an ISWIM interpreter:
+
+\begin{align*}
+  \emph{eval}(M) = N \iff& \exists t\,.~M \Downarrow^t N
+\\\emph{where}\quad & x \Downarrow x
+\\                  & a \Downarrow a
+\\                  & \lambda\,x.M \Downarrow \lambda\,x.M
+\\                  & M~N \Downarrow \textsc{Constapply}(a,b)
+\\                  & \qquad \mbox{if \emph{eval}$(M) = a$ and \emph{eval}$(N) = b$}
+\\                  & M~N \Downarrow [x/N']M'
+\\                  & \qquad \mbox{if \emph{eval}$(M) = \lambda\,x.\,M'$ and \emph{eval}$N = N'$}
+\end{align*}
+
+\emph{Note}: This interpreter uses a simple definition of substitution rather than the closure-and-environment model of the underlying machine.
+Also, evaluation will fail upon reaching a term undefined by $\Downarrow$.
+
+The first theorem of the paper relates this mathematical \emph{eval} to the SECD machine's \emph{Eval}.
+Up to $\alpha$-equivalence, of course.
+
+\begin{theorem}
+For any program M, Eval$(M) =_\alpha$ eval(M).
+\end{theorem}
+
+Proving this theorem requires the time index $t$ from the definition of \emph{eval}.
+The full proof is given in {\bf Section 3}.
+
+
+\subsection{The $\lambda_V$ Calculus}
+
+Beyond \emph{eval}, it would be useful to work in Church's $\lambda$ calculus to prove results about our programming language.
+At the very least, analogues of existing $\lambda$ calculus theorems should hold for the language.
+In particular we should like Plotkin's theorem 4.4 to hold:
+
+\begin{theorem}
+For any closed term $M$ and value $N$, \emph{Eval}$(M) = N \iff \lambda \vdash M \ge N$
+\end{theorem}
+
+Here the symbol $\ge$ stands for ``reduces to''.
+In English, $\lambda \vdash M \ge N$ means there exists a proof using any $\lambda$ rule but symmetry (i.e. $\alpha$, $\beta$, transitivity) that $M = N$.
+
+The plain $\lambda$ calculus, however, is too free to directly correspond to \emph{Eval}.
+It allows $\beta$ reduction of arbitrary terms, does not include \textsc{Constapply}, and allows reduction under a $\lambda$.
+Plotkin addresses these concerns by defining a $\lambda_V$ calculus, wherein:
+\begin{enumerate}
+\item
+  $\beta$-reduction may only substitute values.
+\item
+  Constants are values, and \textsc{Constapply} is represented with Curry's notion of $\delta$-reduction.
+\item
+  Reduction under a $\lambda$ is avoided by defining a \emph{standard reduction} order of evaluation and proving that any $\ge$ derivation implies a standard reduction derivation.
+  The theorem then uses the first value along the standard reduction sequence as $N$.
+\end{enumerate}
+
+{\bf Section 4} carries out this plan.
+The main proof effort is showing that $\ge$ implies a standard reduction sequence.
+That proof in turn requires $\lambda_V$ be Church-Rosser (confluent).
+
+After proving theorem 4.4, the section concludes with a defintion of \emph{contextual equivalence} $(\simeq)$ for \emph{Eval} and proves:
+
+\begin{theorem}
+If $\lambda_V \vdash M = N$ then $M \simeq N$.
+\end{theorem}
+
+The converse does not hold, but at least all reasoning in $\lambda_V$ holds for the \emph{Eval} of the underlying programming language.
+
+
+\subsection{Reduction Semantics}
+
+In fact, the paper defines two version of \emph{eval} and two $\lambda$ calculi, subscripted by $V$ and $N$.
+We have shown the call-by-value definitions, but Plotkin also gives a by-name version and states the same theorems connecting it to a by-name SECD machine.
+These theorems and their corollaries are given in {\bf Section 5} of the paper.
+
+
+\section{Results II: Simulations}
+
+As a first example of reasoning about a concrete language using a more abstract $\lambda$ calculus, Plotkin shows how to simulate $\lambda_V$ by $\lambda_N$ and vice-versa.
+Both simulations use \emph{continuation-passing-style} (CPS) to make control flow explicit.
+In effect, this gives a CPS-converted term no choice but to evaluate in a determined order.
+
+Following Plotkin, we first give the simulation of by-value reduction in a by-name language.
+For any term $M$, we compile to $\overline{M}$ as follows, using the reserved symbols $\kappa$,$\alpha$, and $\beta$.
+
+\begin{align*}
+  \overline{x} &= \lambda\,\kappa.\,\kappa~x
+\\\overline{a} &= \lambda\,\kappa.\,\kappa~a
+\\\overline{\lambda\,x.\,M} &= \lambda\,\kappa.\,\kappa~\lambda\,x.\,\overline{M}
+\\\overline{M~N} &= \lambda\,\kappa.\,\overline{M}(\lambda\,\alpha.\,\overline{N}(\lambda\,\beta.\,\alpha\beta\kappa))
+\end{align*}
+
+By forcing application terms $M$ and $N$ into the head position before they are juxtaposed, Plotkin ensures that both reduce to a value they are applied.
+
+The simulation of by-name using a by-value language is done via a conversion $\underline{M}$ using the term $I = \lambda\,x.\,x$.
+This conversion requires that constants be split between \emph{functional constants} $a$ and \emph{basic constants} $b$.
+Functional constants are valid first arguments to \textsc{Constapply}; basic constants are valid second arguments.
+
+\begin{align*}
+  \underline{x} &= x
+\\\underline{a} &= \lambda\,\kappa.\,\kappa(\lambda\,\alpha.\,a(\alpha~I))
+\\\underline{b} &= \lambda\,\kappa.\,\kappa~b
+\\\underline{\lambda\,x.\,M} &= \lambda\,\kappa.\,\kappa(\lambda\,x.\,\underline{M})
+\\\underline{M~N} &= \lambda\,\kappa.\,\underline{M}(\lambda\,\alpha.\,\alpha\underline{N}\kappa)
+\end{align*}
+
+Here the intuition is that arguments $N$ are delayed under an administrative $\lambda\,\alpha$ and later applying a continuation triggers evaluation.
+
+The main theorems of this section ({\bf Section 6} in the paper) are simulation arguments.
+These use conversion functions $\Psi$ and $\Phi$ to CPS-convert result values.
+This is necessary because the result of $\emph{Eval}_V(\overline{M}~I)$ may be an abstraction $\lambda\,x.\,\overline{M'}$.
+Thus we need to put the same administrative terms in the result of $\emph{Eval}_N(M)$.
+
+\begin{theorem}
+$\Psi(\emph{Eval}_N(M)) = \emph{Eval}_V(\overline{M}~I)$
+and
+$\Phi(\emph{Eval}_V(M)) = \emph{Eval}_N(\underline{M}~I)$
+\end{theorem}
+
+A second result shows that the compiled terms give the same result whether evaluted by-name or by-value:
+
+\begin{theorem}
+$\emph{Eval}_N(\overline{M}~I) = \emph{Eval}_V(\overline{M}~I)$
+and
+$\emph{Eval}_V(\underline{M}~I) = \emph{Eval}_N(\underline{M}~I)$
+\end{theorem}
+
+Finally, the paper shows when one $\lambda$ calculus may be used to reason about another.
+\begin{theorem}
+$\lambda_V \vdash M = N \Rightarrow \lambda_N \vdash \overline{M} = \overline{N}$
+and
+$\lambda_N \vdash M = N \iff \lambda_V \vdash \underline{M} = \underline{N}$
+\end{theorem}
+
+Note that simulating by-value using a by-name language using this paper's techniques does not allow reasoning about the by-value $\lambda$ calculus using the by-name $\lambda$ calculus.
+On the other hand, simulating by-name using by-value requires that constants are classified as either functional or basic.
+So both directions have minor tradeoffs, in addition to the syntactic and operational burden of the extra $\lambda$-terms used to guide reduction order.
+
+At any rate, the paper concludes with the proof of translation for a by-value implementing language.
+
+
+\section{Contributions}
+
+The long-standing contributions are:
+\begin{itemize}
+\item
+  Programming languages and calculi must be defined \emph{as pairs}.
+\item
+  Using a CPS transformation, one can implement an evaluator for either by-name or by-value reduction independent of the semantics for the evaluator's language.
+  The transformations do not give efficient code, but suffice for theoretical reasoning.
+  Hypothetically, one could demonstrate a new feature for Haskell using a prototype built in OCaml.
+\end{itemize}
+
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{extended-intro}
+\end{document}

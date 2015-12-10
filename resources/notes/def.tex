@@ -1,12 +1,16 @@
 \usepackage{hyperref}
 \usepackage{palatino}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\newtheorem*{theorem}{Theorem}
 
 \newcommand{\summary}[1]{
-\renewcommand{\maketitle}{%
+\renewcommand{\maketitle}{{%
 \flushleft\textsf{Ben Greenman \hfill \today} \\
-\textsf{CS 7480 Summary \hfill #1} \\
+\textsf{\hfill #1} \\
 \hrule
-\vspace{0.4cm}}
+\vspace{0.4cm}}}
 \maketitle
 }
 

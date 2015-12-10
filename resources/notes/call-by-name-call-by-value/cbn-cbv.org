@@ -1,0 +1,86 @@
+* begin
+- on the list because matthias
+- he said: this is CS, lambda calculus is NOT CS
+- 34 pages, strictly business. No related work, no conclusion, no future work
+- today: extended introduction
+- http://www.functionalgeekery.com/episode-37-eric-smith
+* outline
+- lambda
+- iswim
+- call-by-name (analogue for cbv)
+- conversions
+* history
+- lambda 1930 (1st paper: 1941)
+- lisp 1960
+- personal computer (1965 idea, 1970 real)
+- ISWIM + SECD 1964
+- this  1974
+- von neumann machine
+-- bottleneck: one bus between memory & control
+-- also, security issues
+* motivation
+- programming! so begin with SECD and find a calculus
+-- values matching secd
+- goal: iswim _implies_ natural computation & interesting calculus
+* terms
+- standardization theorem = TODO
+- operational equality = proof in calc => equal in language
+* section 3
+- define SECD, Eval
+- define eval
+- thm 1: eval =a Eval
+-- lemma 1: E-subst ~ subst (using Real)
+-- lemma 2: eval -> M => Eval -> M
+-- lemma 3: eval ↑ => Eval ↑
+-- proof: only 1 direction! but we don't care about the other
+* section 4
+- make a lambda v calculus to work with
+- const matches iswim, 
+- t1: value subst preserves =a
+- t2: church rosser
+-- reduction implies sequence of parallels
+-- each parallel is confluent
+- t3: stdization: m>n iff is ->n sequence m -> ... -> n
+-- l1: =a a ->v stepper implies a ->v step
+-- l2: =a a >1  stepper implies a  >1 step
+-- l3: m >* n iff m >1 ... >1 n
+-- l4: n1 >1 ... >1 nn and n1 =a m1 => m1 >1 ... >1 mn (same # steps)
+- l5: m >1 m' and n >1 n' and n value then is proof of [n/x]m > l where l =a [n'/x] m'
+      proof size is <= pm + n(x,M')pn
+-- big proof!
+- l6: m >1 n where n const/var => m ->+v n
+- l7: m > m' and m combination and m' abstraction => exists abs l,l' where m ->+v l and l >1 l'
+      also, bounds on proof size
+- l8: m >1 m' ->v m'' => k,k' st. m ->v+ k >1 k' =a m''
+- l9: m1 ... mj is reduction sequence and m >1 m1 then is sr sequence n1 =a m1 .. nk 
+- c1: m > n iff m ->*v n', n,n' unrelated values
+- t4: Eval(M) = N iff M ->v* N
+- c2.1: M=value(N) iff Eval(M) defined
+- c2.2: divide constants into functions F and values B.
+        forall M can define two functions:
+        f ~ Eval
+        g ~ λ 
+        so that X_M(a,b) = c iff Y ab = c, for X f,g and Y Eval,⊢ λ
+-- i.e, if ISWIM is given by functions on constants, then it's equal to λ
+    without any reference to SR sequences
+- t5: λ= implies ctx=
+- TODO what is the end about?
+* section 5
+- only eval, no secd machine (exercise!)
+* section 6
+- t1: indiff: Eval_N(M#(\xx)) = Eval_V(M#(\xx))
+-- the name & value evaluators run the same on converted terms
+- t2: sim: \Psi(Eval_V(M)) = Eval_N(M#(\xx))
+-- converting post-facto gives the same result
+- t3: trans: if \v^L   \vdash M = N
+           then \v^L'' \vdash M# = N#
+       and then \N     \vdash M# = N#
+-- second implication reversible, first is not. (so \N => \v^L'' also fine)
+- c1: defining functions are the same
+- c2: 1. forall M,N, M# ctx=n N# then M ctx=v N
+      2. M#I ctx=n N#I then M ctx=v N
+      3. neither converse holds; conversion reflects but does not preserve
+- 
+* questions
+- why SECD? why is that "computer science"?
+- why not eval before substituting? could get tighter step bounds
