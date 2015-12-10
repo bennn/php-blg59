@@ -1,0 +1,36 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{An Equivalence-Preserving CPS Translation via Multi-Language Semantics}
+
+Defines a CPS translation from a simply-typed language to a language with polymorphism that preserves simply-typed contextual equivalence~\cite{ab-equivalence}.
+If two source terms are contextually equal, then no target context will be able to distinguish translated versions of the terms.
+
+\swtable{
+\item
+  Introduces / showcases many interesting techniques: using target-language types to encode source-language guarantees,
+  using polymorphism for information hiding, back translation via partial evaluation.
+\item
+  Relates two languages of varying power.
+}{
+\item
+  Is this going to scale beyond $\lambda$-calculi?
+  The conclusion notes potential trouble with non-termination and recursive types; effects are another issue.
+  Also, the fact that partial evaluation in the target yields a basically-source term seems more of a quirk than a useful observation.
+\item
+  The introduction gave a motivating background story about the pitfalls of language-based security, but then the paper only talked about purely functional languages.
+  I wasn't convinced that security is a major issue for pure languages.
+\item
+  I don't understand the criticisms towards game semantics and domain theory in the introduction and conclusion.
+  The first priority ought to be finding \emph{any} technique that scales all the way to a real language\textemdash say GHC or SML/NJ.
+  In celebration we can worry about finding beautiful proofs and intuitive explanations, but until then there's no sense in discouraging other ideas.
+}
+
+The original definition of \emph{ciu} equivalence required contexts to use their hole term at least once~\cite{mt-equivalence,p-howe}.
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{ab-equivalence}
+\end{document}
