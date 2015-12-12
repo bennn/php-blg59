@@ -8,7 +8,7 @@
 \begin{abstract}
   Plotkin's 1975 paper is strictly business.
   There are many theorems packed in the space of 35 pages, with little room for discussion, conclusions, and related/future work.
-  This document provides a modern summary.
+  This document gives a summary.
 \end{abstract}
 
 
@@ -29,14 +29,14 @@ The significance of these works, in order of their appearance, was:
   His paper suggested using calculi to influence language design and gave a language called ISWIM to demonstrate.
 \item
   Plotkin formalized the correspondence between $\lambda$ and ISWIM.
-  Additionally, Plotkin proved one method of simulating a call-by-value $\lambda$-calculus with a call-by-name one, and other method in the opposite direction.
+  Additionally, Plotkin proved a method of simulating a call-by-value $\lambda$-calculus with a call-by-name calculus, and another method in the opposite direction.
 \end{itemize}
 
 
 \emph{Offhand comment}: Building connections is an important part of science, and especially computer science.
 The Church-Turing thesis unified different models of computation.
 This work by Plotkin unified language calculi with language implementations \emph{and} by-name and by-value reduction semantics.
-Nowadays, the main source of connections is the propositions-as-types principle; we are slowly unifying type theory, logic, and category theory.
+Nowadays, a popular source of connections is the propositions-as-types principle; we are slowly unifying type theory, logic, and category theory.
 
 
 \section{Results I: Lifting Computer Science}
@@ -76,10 +76,10 @@ The special symbol {\bf ap} is used internally by the machine's transition funct
   \end{quote}
   
   \begin{align*}
-    \emph{Eval(M) = N} \iff& \emph{Load}(M) \Rightarrow D \mbox{ and } \emph{Unload}(D) = N
-  \\\emph{Load}(M) =& \langle {\bf nil}, \emptyset, M, {\bf nil} \rangle
-  \\\Rightarrow~~  =& \mbox{(omitted, see {\bf Section 3} of the paper)}
-  \\\emph{Unload}(\langle Cl, \emptyset, {\bf nil}, {\bf nil}\rangle) =& \emph{Real}(Cl)
+    \emph{Eval(M) = N} \iff& ~~\emph{Load}(M) \Rightarrow D \mbox{ and } \emph{Unload}(D) = N
+  \\\emph{Load}(M) =&~~\langle {\bf nil}, \emptyset, M, {\bf nil} \rangle
+  \\\Rightarrow~~  =&~~\mbox{(omitted, see {\bf Section 3} of the paper)}
+  \\\emph{Unload}(\langle Cl, \emptyset, {\bf nil}, {\bf nil}\rangle) =&~~\emph{Real}(Cl)
   \end{align*}
 
   \begin{quote}
