@@ -1,0 +1,277 @@
+\documentclass{article}
+\input{def}
+\begin{document}
+
+\begin{abstract}
+  Short presentation of Kildall's algorithm.
+\end{abstract}
+
+\subsection*{Kildall \& Static Analysis}
+\href{https://en.wikipedia.org/wiki/Gary_Kildall}{\emph{Gary Kildall}} (1942\textendash1994) grew up in Seattle, attended U. Washington, taught at the \href{http://www.nps.edu/}{US Naval Postgraduate School}, and worked at Intel.
+He is best known for developing the {\tt PL/M}~\cite{plm} and {\tt CP/M}~\cite{cpm} microprocessor programming languages.
+
+\emph{Static Analysis} is the technical term for analyzing and modifying a program \emph{before} running it.
+In 1973, just after finishing his doctorate at UW, Kildall published an algorithm unifying many similar static analyses for \href{http://www.cs.cornell.edu/courses/cs412/2008sp/lectures/lec24.pdf}{control-flow graphs}.
+
+
+\subsection*{Preliminaries}
+Define a language of control-flow graphs with:
+\begin{align*}
+  \emph{Variables}  ~v &:= \kvar{x}
+                           \mid \kvar{y}
+                           \mid \ldots
+\\\emph{Constants}  ~c &:= \kint
+                           \mid \ldots
+\\\emph{Expressions}~e &:= \kassign{v}{e}
+                             \mid \kplus{e_1}{e_2}
+                             \mid \kminus{e_1}{e_2}
+                             \mid \ldots
+\end{align*}
+Henceforth we will use meta-variables $V$, $C$, and $E$ to denote the set of all variables, constants, and expressions, respectively.
+
+A \emph{program} is given as a graph $(V, E, I)$ where:
+\begin{itemize}
+\item
+  $V$ is a collection of expressions
+\item
+  $E \subseteq V \times V$ represents directed edges between expressions in $V$.
+  By convention, $E = (e_1, e_2)$ means that control flows from $e_1$ into $e_2$.
+\item
+  $I \subseteq V$ is a collection of \emph{entry points} to the program.
+\end{itemize}
+
+Lastly, define the \emph{immediate successors} of an expression $e \in V$ as the set $\ksucc{e} = \{ e' \mid (e, e') \in E\}$.
+
+
+\subsection*{The Algorithm}
+\subsubsection*{Input}
+\label{input}
+
+The algorithm requires:
+\begin{itemize}
+\item A program $(V, E, I)$
+\item A finite \emph{pool} $P$ of optimizing information
+\item An equivalence relation $=$ on $P$
+\item A commutative, associative meet operation $\wedge : P \times P \rightarrow P$
+      such that the strict partial order $p_1 < p_2 \equiv p_1 \wedge p_2 = p_1 \wedge p_1 \neq p_2$ is well-founded
+\item A token $\kunit$ such that $\forall p \in P, p \wedge \kunit = p$
+\item A store $\Sigma : V \rightarrow P$ of information associated with expression nodes.
+      Initially, $\Sigma(e) = \lambda(v). \kunit$.
+      Note that we model $\Sigma$ as a function, but it is very much \emph{stateful}.
+\item An analysis function $f : V \times P \rightarrow P$ that propogates information through an expression
+\item A start function $\eta : I \rightarrow P$ of information about entry points.
+      One possible implementation is $\lambda(i). \emptyset$.
+\end{itemize}
+
+Intuitively, the pool is the domain of information obtained via static analysis and the analysis function refines the information associated with an expression.
+Running the algorithm will produce the ``most refined'' information for each expression in the program graph.
+
+
+\subsubsection*{Algorithm}
+\label{algorithm}
+
+Kildall's algorithm maintains a worklist $L$ of nodes to visit, and repeatedly propogates information through the program graph.
+We assume operations $\kpop$ and $\kunion$ on $L$.
+
+\begin{algorithmic}[1]
+\STATE $L \leftarrow \{(i, \eta(i)) \mid i \in I\}$
+\WHILE {$L \neq \emptyset$}
+  \STATE $(e, p_i) \leftarrow \kpop(L)$
+  \STATE $p_e \leftarrow \Sigma(e)$
+  \STATE $p_{e}^+ \leftarrow p_e \wedge p_i$
+  \IF {$p_{e}^+ \neq p_e$}
+    \STATE $\Sigma(e) \leftarrow p_e^+$
+    \STATE $L \leftarrow L \kunion \{(e', f(e, p_{e}^+)) \mid e' \in \ksucc{e} \}$
+  \ENDIF
+\ENDWHILE
+\end{algorithmic}
+
+Information propogates through the whole program regardless of branching structure.
+That is really great.
+No matter how many {\tt while}-loops or {\tt GOTO} statements in a program, Kildall's algorithm can handle it.
+
+
+\subsubsection*{Properties}
+\label{properties}
+
+\begin{t1}
+Kildall's algorithm runs in polynomial time.
+\end{t1}
+\begin{proof}
+Each iteration of the outer loop removes an element from $L$.
+Elements are added to $L$ on line 8, so it suffices to show that line 8 is executed only finitely many times.
+
+We reach line 8 only if $p_{e}^+ \neq p_e$, or rather, only if $p_e \wedge p_i \neq p_e$.
+In terms of the well-founded order $<$, this condition is $p_i < p_e$; intuitively, $p_i$ must refine the information in $\Sigma$.
+Now since $p_e = \Sigma(e)$ is initialized to $\kunit$ and $\wedge$ is a meet operation, $p_i < p_e$ can only be true finitely often.
+
+In particular, the running time of Kildall's algorithm is $O(|V| * \|P\|)$, where $|V|$ is the cardinality of $V$ and $\|P\|$ is the length of the longest path from $\kunit$ to $\emptyset$ in the lattice defined by $P$ and $\wedge$.
+\end{proof}
+
+For the next theorem, let $p_e^*$ be the result of $\Sigma(e)$ after Kildall's algorithm terminates.
+Also let $\kpath{e}$ be the set of all paths $e^* = e_1, \ldots, e_m, e$ from an expression $e_1 \in I$ to $e$ and let $f^*$ be the extension of $f$ to paths, defined as $f^*(e^*) = f(e, f(e_m, \ldots f(e_1, \eta(e_1)) \ldots))$.
+\begin{t2}
+  $\displaystyle p_e^* = \bigwedge_{e^* \in \kpath{e}} f^*(e^*)$
+\end{t2}
+\begin{proof}
+Kildall's algorithm enumerates paths $e^*$ of length $k$ (henceforth $e^*_k$) in a breadth-first manner.
+The enumeration continues as long as $e^*_k > e^*_{k+k'}$ for each successive pair of paths.
+Conversely, once a pair $e^*_k \leq e^*_{k+k'}$ is found then $e^*_k \leq e^*_{k+k''}$ for all longer paths (of length $k + k''$).
+Thus Kildall's algorithm halts when $\bigwedge$ reaches a fixed-point.
+\end{proof}
+
+\begin{c1}
+\end{c1}
+\begin{proof}
+Follows from Theorem 2 and the associativity of $\wedge$.
+\end{proof}
+
+
+\subsection*{Example Passes}
+\label{examples}
+%% Outline:
+%% - Summary
+%% - Optimizing Function
+%% - Worked example
+
+\subsubsection*{Constant Propogation}
+The goal of constant propogation is to perform math at compile-time rather than run-time.
+For example, the sequence of instructions:
+
+\begin{lstlisting}
+    a := 1
+    b := a
+\end{lstlisting}
+
+Could easily be converted to:
+
+\begin{lstlisting}
+    a := 1
+    b := 1
+\end{lstlisting}
+
+and so on for more complicated expressions, if the compiler associates variable references with known constants.
+To this end, we can implement the parameters for Kildall's algorithm:
+\begin{itemize}
+\item The pool $P$ is all sets of all pairs of variables and constants: $\kpow{(V \times C)}$.
+\item The meet operation $\wedge$ is set intersection; the empty set means we have no information about constants in an expression.
+\item The optimizing function $f$ is such that $(v, c) \in f(e, p)$ if and only if:
+\item[]
+  \begin{itemize}
+  \item $(v, c) \in p$ and $e$ is not an assignment $v := e'$
+  \item $e$ is an assignment $v := c$
+  \end{itemize}
+\end{itemize}
+
+\subsubsection*{Common-Subexpression Elimination}
+CSE replaces computations with variable references, when the computation has previously been stored in a variable.
+As a quick example:
+\begin{lstlisting}
+    a := 1234 * 5678
+    b := 1234 * 5678
+\end{lstlisting}
+
+Only needs to perform a single multiplication.
+Other pure computations can be memoized similarly.
+
+In this pass:
+\begin{itemize}
+\item The pool is all sets of equivalence classes of expressions, $\kpow{\kpow{E}}$
+\item The meet operation is pointwise intersection of equivalence classes. Formally:
+  $$p_1 \wedge p_2 = \{ p_1' \cap p_2' \mid p_1' \in p_1 \wedge p_2' \in p_2 \}$$
+\item The optimizing function puts sub-expressions into equivalence classes and tries to replace expressions with variable references.
+\item[]
+  \begin{itemize}
+  \item First, traverse the AST of the node $e$ and replace known sub-expressions with variable references.
+  \item Create a new equivalence class for $e$, add all expressions with sub-expressions equivalent to a sub-expression in $e$
+  \item If $e$ is an assignment $a := e'$, remove all references to $a$ in the pool and make copies of all expressions containing $e'$, substituting $a$ for $e'$ in the copy.
+  \end{itemize}
+\end{itemize}
+
+\subsubsection*{Register Optimization}
+Register optimization seeks to minimize the number of variables stored in registers at a program node.
+For example the following expression needs space to store 4 computations:
+\begin{lstlisting}
+    a := b + c
+\end{lstlisting}
+One for $b$, one for $c$, one for $b + c$, and one for $a$.
+If $b$ and $c$ are not used in subsequent expressions, then their registers may be recycled.
+
+Kildall's algorithm can determine the number of occupied registers at each node by reversing edges in the program graph:
+\begin{itemize}
+\item The pool is $\kpow{V \cup E}$, because variables and expressions require register space.
+\item The meet is set union; in the worst case, we need registers for every variable in the program.
+\item The optimizing function records the variables referenced in a node:
+\item[]
+  \begin{itemize}
+  \item If $e$ is an assignment to $v$, remove $v$ from the current pool.
+  \item Add every \emph{sub-expression} in the AST of $e$ to the pool.
+    For instance, $a + b$ creates a pool $\{a, b, a + b\}$.
+  \end{itemize}
+\end{itemize}
+
+
+\subsection*{Modern Applications}
+
+\subsubsection*{CompCert}
+The CompCert compiler~\cite{src,refman}\footnote{Version \href{https://github.com/AbsInt/CompCert/releases}{2.6}, as of \texttt{2015-01-24}.} uses Kildall's algorithm in 8 of its 20\footnote{See the ``Compiler Passes'' section of: \url{http://compcert.inria.fr/doc/index.html}} major passes.
+
+The optimized passes are:
+
+\begin{tabular}{r l}
+\emph{Pass Title} & \emph{Explanation} \\\hline
+ Allocation & Register allocation \\
+ ConstProp  & Constant Propogation \\
+ CSE        & Common-Subexpression Elimination \\
+ DeadCode   & Dead-Code Elimination \\
+ Linearize  & Linearize a control-flow graph \\
+ Liveness   & Liveness analysis for registers \\
+ RegAlloc   & Register Allocation \\
+ Splitting  & Split registers' live range \\
+\end{tabular}
+% \cite{jlblp-verasco}
+
+
+\subsection*{The End of Optimizing Compilers?}
+When preparing these notes, I downloaded a few compilers and grepped their sources for the string ``kildall'' (case insensitive).
+
+\begin{multicols}{2}
+{\tt
+ \begin{itemize}
+ \item[] gcc
+ \item[] clang
+ \item[] llvm
+ \item[] javac (jdk 8)
+ \item[] ghc
+ \item[] ocaml
+ \item[] ceylon
+ \item[] lua jit
+ \item[] racket
+ \item[] CompCert
+ \end{itemize}
+}
+\end{multicols}
+
+Only CompCert returned matches.
+Maybe because there are faster algorithms today.
+
+After a little more digging, I found the slides for a talk titled \emph{The Death of Optimizing Compilers}~\cite{death-b}, which claims that optimizing compilers are becoming less useful today.
+\begin{itemize}
+\item
+  Improving hardware gives more power \emph{and} throughput,
+   so we tend to see very small patches of hot code and lots of little-used code.
+\item
+  The largest bottlenecks are due to bad algorithms.
+  Optimizing compilers do not convert bad algorithms into good ones
+  (i.e. convert bubble sort into merge sort).
+\end{itemize}
+
+Makes sense to me.
+The benefits of constant propogation seem tiny in the grand scheme of writing a better algorithm, and experiments like \emph{Stabilizer}~\cite{stabilizer-cb} give evidence that the best optimization technology has hit a ceiling.
+
+\vfill{}
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{kildall}
+
+\end{document}
