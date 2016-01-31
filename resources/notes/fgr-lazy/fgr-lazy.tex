@@ -1,0 +1,29 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Lazy Contract Checking for Immutable Data Structures}
+
+The paper notes 2 desirable alternatives for data structure contracts:
+\begin{enumerate}
+\item Structures following an invariant should be subtypes of structures possibly-not following the invariant.
+\item Contracts should not change the asymptotic complexity of an algorithm.
+\end{enumerate}
+
+The point of $1$ is data structures should not always be black-box.
+If a library designer exposes his type representation, users should be able to synthesize data structures without using the library's constructors.
+Also, it should be possible to re-use third-party functions on compatible data, even if the third-party does not necessarily preserve the data structure's invariants.
+
+Supporting $1$ previously violated $2$, as every call to a library function would exhaustively check a data structure.
+This paper solves the issue with lazy recursive contracts~\cite{fgr-lazy} 
+
+The new operator is {\tt define-contract-struct}\footnote{As of Jan. 2016, Racket integrates dependent struct contracts with the conventional {\tt struct} keyword.}
+Recursive structs are validated as they are explored\textemdash only when a field is accessed.
+
+\emph{Caveat:} this works only for structs; the built-in {\tt vector} and {\tt hash} types, etc, are still eager.
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{fgr-lazy}
+\end{document}
