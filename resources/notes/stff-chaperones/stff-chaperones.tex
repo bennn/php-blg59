@@ -1,0 +1,20 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Chaperones and Impersonators: Run-time Support for Reasonable Interposition}
+
+A \emph{chaperone} is a proxy limited to stateful behavior.
+For instance a chaperone can record a log of all accesses to a vector, but it may not change the value returned by an access.
+
+An \emph{impersonator} is an unrestricted proxy limited to mutable data structures.
+Impersonators can do anything with their inputs and give any output.
+
+These are really great, and they have low overhead~\cite{stff-chaperones}.
+Possibly because the core implementation is in the C runtime system.
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{stff-chaperones}
+\end{document}
