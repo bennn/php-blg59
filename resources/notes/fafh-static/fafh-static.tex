@@ -1,0 +1,21 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Dynamic Inference of Static Types for Ruby}
+
+Collect type constraints by monitoring program paths in a training run.
+Static types inferred from the dynamic constraints.
+
+For soundness, only need to cover each expression once.
+Does not need to cover each expression with each possible assignment of variables
+ (because the language is purely functional or they assume the type of state used in a loop is invariant\textemdash which is pretty reasonable).
+
+P.S. in the related work, soft types is ``written off'' for not handling objects.
+
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{fafh-static}
+\end{document}
