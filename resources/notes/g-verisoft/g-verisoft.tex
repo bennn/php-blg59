@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Model Checking for Programming Languages with VeriSoft}
+\onehalfspacing
+
+The paper gives a high-level description of stateless search and advertises
+ a model checker called VeriSoft that implements stateless search of C
+ programs~\cite{g-verisoft}.
+VeriSoft is capable of quickly exploring large state spaces.
+This makes it possible to directly check C programs for deadlocks and
+ assertion violations rather than models of C programs.
+
+Stateless search is a relaxation of classical state-space exploration.
+Instead of recording all visited states during the search (eventually caching
+ the entire state space in memory), stateless search records only the current
+ path and a few additional states\textemdash no more than will fit in memory.
+The search is then guided by the recorded states, ideally to
+ minimize the number of transitions needed to find bad states.
+
+The main difficulty is choosing which states to remember and leveraging this
+ information to avoid exploring redundant paths.
+To this end, the paper gives an algorithm that records \emph{sleep sets}
+ and computes \emph{persistent sets} to yield an efficient search.
+At a high level, these sets recognize independent sequences of transitions and
+ then exclude all possible interleavings of independent (i.e. commuting) transitions.
+However these key techniques are not explained in detail.
+Sleep sets are defined in~\cite{g-using} and~\cite{gp-refining} shows how to compute
+ persistent sets.
+
+Overall the author's stateless search seems promising.
+The translation from program to model (or model to runnable program) always
+ makes me nervous, though I understand the need of abstracting the pragmatic
+ details of real languages.
+So I am glad that VeriSoft's model is the program itself.
+But I would have liked to see more details and evidence in this paper; in
+ particular an algorithm for computing sleep sets \& persistent sets, and
+ more evaluation than the dining philosophers and one bug report.
+
+\questions{
+\item
+  The model of a concurrent system presented in Section 2 is deterministic.
+  Isn't this too restrictive?
+  For one, it would be useful to check parallel programs.
+  But more likely, if I have a bug in my supposedly-deterministic C program
+   that introduces non-determinism, I would like VeriSoft to find it\textemdash
+   would it?
+\item
+  I do not understand the statement that non-determinism is ``not found in
+   programming languages''.
+  C definitely had random number generation in 1997 and it has always been prone
+   to non-deterministic memory errors: suppose I have a program that
+   allocates an array and reads off the end of it\textemdash what is the result?
+\item
+  Is VeriSoft still in use today? I search Google quickly, but only found
+   academic papers.
+}
+
+%% \comments{
+%% \item
+%%   Yes! The program is the model!
+%% \item
+%%   Visible \& invisble ops remind me of observations and actions
+%% \item
+%%   wtf VS\_toss. No random-number generators before this?
+%% }
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{g-verisoft}
+\end{document}
