@@ -1,0 +1,60 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Lazy Abstraction}
+\onehalfspacing
+
+Instead of trying to prove a program property by building a model, checking if the property holds, refining the model and repeating,
+ the paper suggests proving the property in ``one'' lazy pass by incrementally building a model~\cite{hjms-lazy}.
+Initially the model is not very specific, but gets refined lazily as the property is checked based on where the proof fails to succeed.
+The point of this one-pass, incremental approach is that it saves re-doing work by running the 3-step loop.
+
+Their main algorithm is very general.
+Given (essentially) a region structure $R$ (representing sets of program states),
+ 5 well-typed operations regarding $R$ ($\sqcup$, $\sqcap$, \emph{pre}, \emph{post}, $\llbracket\cdot\rrbracket$),
+ and a \emph{focus} operation for refining an abstract region to exclude specific impossible paths,
+ the algorithm explores the region and either returns an error trace or a proof of satisfiability.
+Interestingly, there are no laws or extra properties that $R$ and the 5 operations
+ must satisfy, though the algorithm is not guaranteed to terminate unless unequal
+ program states can be distinguished in finitely many steps and the $\sqcup$
+ operation is well-founded.
+
+The algorithm is implemented for C programs in the \textsc{Blast} model checker.
+The authors briefly explain how \textsc{Blast} is implemented and show
+ high-level results of using \textsc{Blast} to validate small device driver programs.
+One interesting detail is that the tool's runtime is dominated by calls to a
+ theorem prover (Simplify) and not the lazy abstraction algorithm.
+That is very good.
+
+
+\questions{
+\item
+  Why couldn't they handle the C multiplication operator?
+  Is that just a limitation of the theorem prover they worked with?
+\item
+  Evaluating the device driver code used fewer predicates than I was
+   expecting.
+  I thought we might have 3-5 predicates per branch in the program
+   rather than 3-5 total.
+  And so, I wonder what these predicates look like.
+\item
+  What is a CFA? It looks like a control flow graph, but the anagram is wrong.
+}
+
+\comments{
+\item
+  The level of abstraction used in Sections 3 and 4 didn't help me understand the paper;
+   I and would have preferred a more concrete / restricted exposition.
+  On one hand it's good that the algorithm can do more than
+   verify C programs, but it wasn't clear to me what those other application
+   areas might be.
+  Without being able to imagine other applications,
+   the presentation seemed like abstraction for abstraction's own sake.
+}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{hjms-lazy}
+\end{document}
