@@ -1,0 +1,43 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{Inline Expansion: \emph{when} and \emph{how}?}
+
+Goal: Faster code without too much size increase~\cite{s-inline}.
+
+\subsubsection*{when}
+The proposed inlining metric compares the code size of a function call
+ against the code size of to-be-inlined function body and additionally
+ measures the expected gain upcoming optimizations might achieve if the
+ inlining did happen.
+
+All these decisions happen statically.
+The compiler first picks a total size parameter $k$, to prevent huge/recursive
+ expansion, and then analyzes functions in random order.
+
+
+\subsubsection*{how}
+Non recursive functions: just let-bind the parameters and paste the inlined function below.
+
+Recursive: introduce a label for the recursive call \& inline into a loop.
+
+Lastly, the paper remarks on a loop unrolling heuristic.
+Add a new label then unroll as long as the inlining fuel $k$ allows.
+
+
+On a few small programs, the algorithms appear to trade time for space evenly
+ (with slight advantage to time\textemdash you get faster faster than you get bigger).
+
+
+\questions{
+\item
+  Why are function call sequences so expensive in these languages?
+  Can we make them faster\textemdash more like {\tt goto} statements for tail calls?
+}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{s-inline}
+\end{document}
