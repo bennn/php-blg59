@@ -1,0 +1,54 @@
+\documentclass{article}
+\input{def}
+\begin{document}
+\maketitle
+
+\subsubsection*{0. Quick Paper Summary}
+\begin{itemize}
+\item McMillan's definition
+\item State the applications
+\item[]
+  \begin{itemize}
+  \item Compute program-path invariants
+  \item Choose predicates, for predicate abstraction
+  \item Shrink a transition relation
+  \end{itemize}
+\end{itemize}
+
+
+\subsubsection*{1. Background}
+\begin{itemize}
+\item Craig's definition \& lemma \textemdash ``The last deep theorem of first-order logic''
+\item Examples, i.e. $P \wedge (P \Rightarrow Q)$ and $R \Rightarrow Q$ have interpolant $Q$.
+\item Simple proof, by induction on $\big|\,\fvs{A} \setminus \fvs{B}\,\big|$
+\item The ``art'' of picking a best interpolant
+\end{itemize}
+
+
+\subsubsection*{2. Programming Example}
+\begin{itemize}
+\item Key application: finding bad paths in a program
+\item Correctness: all paths $A$ that reach assertion $B$ should imply $\vdash A \wedge B$.
+\subitem i.e., we want $\vdash \neg(A \wedge \neg B)$
+\item Interpolant for $(A, \neg B)$ should give ``minimal facts'' about $A$
+      used to prove $\neg \neg B$. Use these ``facts'' to get inductive invariants.
+\end{itemize}
+
+
+\subsubsection*{3. Back to McMillan}
+\begin{itemize}
+\item Technical details of bounded model-checking
+\item Inductive invariants, predicate abstraction, simpler transition relations
+\item Infinite-state systems, Lamport's bakery \& Fischer's timed mutex
+\item Limitation: non-local properties
+\end{itemize}
+
+
+\subsubsection*{4. Interpolants from Refutations}
+\begin{itemize}
+\item How to go from $\vdash \neg(A \wedge B)$ to an interpolant?
+\item Which theories have efficient procedures, what is ``efficient''
+\item Composing theories
+\end{itemize}
+
+\end{document}

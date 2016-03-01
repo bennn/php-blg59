@@ -1,0 +1,31 @@
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{palatino}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathpartir}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{stmaryrd}
+
+\newtheorem*{theorem}{Theorem}
+\newtheorem*{challenge}{Challenge}
+\newtheorem*{defn}{Definition}
+
+\renewcommand{\maketitle}{{%
+\flushleft\textsf{Ben Greenman}
+\textsf{\hfill 2016-02-29 \hfill Outline: Interpolants in Model Checking} \\
+\vspace{1mm}
+\hrule
+\vspace{0.4cm}}}
+
+\newcommand{\fvs}[1]{\emph{atoms}(#1)}
+
+\lstset{
+  basicstyle=\ttfamily,
+  breaklines=true,
+  language=C,
+  numbers=left
+}
+
+\newcommand{\todo}[1]{\textbf{TODO: #1}}
