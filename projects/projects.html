@@ -12,12 +12,43 @@
     </div>
     <div class="midcol">
       <div class="publication">
+        <h3 class="pubtitle"><a class="publink" href="https://github.com/nuprl/gradual-typing-performance/">Gradual Typing Performance</a></h3>
+        <p class="pubauthors">
+          <a class="colorlink" href="https://github.com/nuprl/gradual-typing-performance/graphs/contributors">Our</a> home for work on improving the performance of gradual type systems.
+          Contains benchmarks, publications, developer tools, and experiments.
+        </p>
+      </div>
+
+      <div class="classyspace"> </div>
+
+      <div class="publication">
+        <h3 class="pubtitle"><a class="publink" href="https://github.com/bennn/trivial/">trivial: Observably Improved Type Checking</a></h3>
+        <p class="pubauthors">
+          A library of local, composable syntactic analyses.
+          We propagate facts about constant values in the program to standard library functions and generate annotations for the type checker.
+          The library documentation has examples.
+
+        </p>
+        <p class="pubauthors">
+          Running the Typed Racket type checker on existing Typed Racket code
+           detects more errors and accepts more correct programs when this
+           library is imported.
+          Importing shadows existing function calls, replacing them with type-annotating
+           elaborations.
+        </p>
+      </div>
+
+      <div class="classyspace"> </div>
+
+      <div class="publication">
         <h3 class="pubtitle"><a class="publink" href="https://github.com/bennn/ipoe/">Interactive Poetry Editor</a></h3>
         <p class="pubauthors">
           Implements an extensible family of languages for checking correctness properties of poems.
           For instance, we have a little checker for <a class="colorlink" href="https://github.com/bennn/iPoe/blob/master/ipoe/haiku/lang/reader.rkt">haikus</a> and another for <a class="colorlink" href="https://github.com/bennn/iPoe/blob/master/ipoe/english-sonnet/lang/reader.rkt">sonnets</a>.
           These are defined through a uniform specification language, which compiles its programs into specific poetry-checking programs.
 
+        </p>
+        <p class="pubauthors">
           The "interactive" part is very important.
           Unless told otherwise, the checker will actively search for new words and keep a dialog with the user.
           Next up is learning some rules of English based on these interactions.
@@ -40,7 +71,7 @@
       <div class="publication">
         <h3 class="pubtitle"><a class="publink" href="https://github.com/bennn/zordoz/">Racket Bytecode Explorer</a></h3>
         <p class="pubauthors">
-          A small REPL interface to Racket bytecode (.zo) files.
+          A small REPL interface to Racket bytecode (<tt>.zo</tt>) files.
           Has a string-based search features, and can be called from the command-line to give a count of AST nodes' frequency.
         </p>
       </div>
@@ -51,7 +82,7 @@
         <h3 class="pubtitle"><a class="publink" href="https://github.com/cs3110/tools/">OCaml Command Line Interface</a></h3>
         <p class="pubauthors">
           Courseware for <a class="hiddenlink" href="../teaching/teaching.html">CS 3110</a> at Cornell.
-          Streamlines compilation and unit testing for students (no need to call ocamlc!), and helps staff with grading; in particular running and collecting statistics on a test suite and emailing students if their submission failed to compile.
+          Streamlines compilation and unit testing for students (no need to call <tt>ocamlc</tt>!), and helps staff with grading; in particular running and collecting statistics on a test suite and emailing students if their submission failed to compile.
         </p>
       </div>
     </div>
