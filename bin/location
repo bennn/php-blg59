@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
-ABOUT=/Users/ben/code/php-blg59/about/about.html
-sed -i .aux 's#^.*id="location".*$#          <div id="location">'"$1"'</a>#' $ABOUT
-scp $ABOUT ccis:.www/about/about.html
+if [ $# -eq 1 ]; then
+  ABOUT=/Users/ben/code/php-blg59/about/about.html
+  sed -i .aux 's#^.*id="location".*$#          <div id="location">'"$1"'</a>#' $ABOUT
+  scp $ABOUT ccis:.www/about/about.html
+else
+  echo "Usage: location <string>"
+fi

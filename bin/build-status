@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+if [ $# -eq 2 ]; then
+  ABOUT=/Users/ben/code/php-blg59/about/about.html
+  sed -i .aux "s#^.*id=\"build-status\".*\$#          <img id=\"build-status\" class=\"keepalive\" src=\"https://img.shields.io/badge/build-$1-$2.svg\" alt=\"build:$1\" title=\"build:$1\"/>#" $ABOUT
+  scp $ABOUT ccis:.www/about/about.html
+else
+  if [ $# -eq 1 ]; then
+    printf "Usage: build-status <status> <color>\nValid <color>:\n- brightgreen\n- green\n- yellowgreen\n- yellow\n- orange\n- red\n- lightgrey\n- blue\n"
+  else
+    echo "Usage: build-status <status> <color>"
+  fi
+fi
