@@ -1,0 +1,45 @@
+\documentclass{article}
+
+\input{'../def.tex'}
+
+\begin{document}
+\summary{A Critique of the Remote Procedure Call Paradigm}
+
+
+\begin{quote}
+  ``Meaningful distinctions must be preserved.'' --E. Bishop
+\end{quote}
+
+The RPC model aims to make local and remote procedure calls indistinguishable.
+Tanenbaum and van Renesse argue that hiding the distinction between remote and local calls has many drawbacks~\cite{tv-euteco-1988}.
+
+In particular, RPCs \emph{significantly differ} from local calls because:
+
+\begin{itemize}
+\item RPCs can \emph{fail} due to connection errors;
+\item RPCs have higher \emph{latency};
+\item RPCs run on a \emph{different} machine.
+\end{itemize}
+
+The possible \emph{failures} mean programmers must guard remote calls with error-handling code.
+It is not clear, however, what the programmer should do to recover from a general RPC failure.
+If the client/server connection fails after the server performs a stateful update, the client should not necessarily repeat the call.
+If the server dies, clients may need to re-initialize state on the server.
+If the client dies, the server may want to kill the orphaned process.
+
+The \emph{latency} makes RPCs unsuitable in real-time applications or within high-frequency loops.
+An RPC in the former case may add semantics-altering delays; the authors give device driver timeouts as an example.
+An RPC in the latter case may add large performance overhead.
+
+The \emph{remote} aspect of an RPC makes serialization and memory errors possible.
+Programmers cannot assume the server has access to the same pointers and global variables as the client machine.
+Nor can programmers assume floating point numbers have the same precision on the server, or that structures have the same alignment.
+
+The authors furthermore note that RPCs are blocking, cannot make broadcast notifications, and cannot yield results in a stream.
+In summary the RPC paradigm is useful in some cases, but is unsuitable for general-purpose distributed computing.
+
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{tv-euteco-1988}
+\end{document}
