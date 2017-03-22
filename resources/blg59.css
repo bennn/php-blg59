@@ -99,6 +99,10 @@ figcaption {
     text-decoration: none;
 }
 
+li {
+    margin-bottom: 20px;
+}
+
 .colorlink {
     color: #0068ac;
     text-decoration: none;
