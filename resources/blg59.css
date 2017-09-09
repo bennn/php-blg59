@@ -1,5 +1,5 @@
 html body {
-    background-color: #222222;
+    background-color: #001a00;
     color: #89cce2;
     font-family: "Palatino Linotype",Palatino,serif;
     height: 100%;
@@ -44,6 +44,8 @@ figcaption {
 
 .header a {
     text-decoration: none;
+    color: #f9e6ff;
+    font-size: 120%;
 }
 
 .keepalive {
@@ -85,13 +87,10 @@ figcaption {
     text-indent: 2%;
 }
 
-.nav {
-    background-color: #111111;
-    bottom: 0%;
-    height: 12%;
-    left: 0%;
-    position: fixed;
-    width: 100%;
+.container {
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 .hiddenlink {
@@ -143,16 +142,24 @@ li {
     margin-left: 3%;
 }
 
+.nav a {
+  text-decoration: none;
+  font-family: "Lucida Console", Monaco, monospace;
+  color: #00ff99;
+}
+
 .target {
     border: 2px solid #ffffff;
     border-radius: 3px;
-    float: left;
-    font-size: 140%;
-    height: 85%;
-    margin-top: 0.25%;
-    margin-left: 4%;
+    font-size: 110%;
+    margin-top: 10px;
+    margin-left: 20px;
     text-align: center;
-    width: 12%;
+}
+
+.target p {
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .tagline {
