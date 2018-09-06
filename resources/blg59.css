@@ -37,6 +37,7 @@ figcaption {
 
 .header {
     margin-top: 1%;
+    margin-bottom: 5%;
     text-align: center;
     height: 10%;
     width: 100%;
@@ -44,8 +45,18 @@ figcaption {
 
 .header a {
     text-decoration: none;
-    color: #f9e6ff;
     font-size: 120%;
+    color: #f9e6ff;
+}
+
+.header p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-size: 95%;
+}
+
+.header h1 {
+    margin-bottom: 0px;
 }
 
 .keepalive {
