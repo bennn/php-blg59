@@ -1,0 +1,508 @@
+\documentclass{article}
+\usepackage{fullpage, setspace, amsmath, minibox}
+\begin{document}
+  \title{Calendar Computations}
+  \date{}
+  \author{Ben Greenman (blg59)}
+  \maketitle
+  \onehalfspacing
+
+  \renewcommand{\abstractname}{}%\large{Introduction}}
+  \begin{abstract}
+  \large
+    Did you know that March 21, 2001 was a Wednesday? Or that January 1, 2076 will be a Friday?
+    With a bit of math, one can determine the exact day of the week of any date: 
+    past, present, or future. 
+    Calculate the weekday on which the Declaration of Independence was signed (July 4, 1776), 
+    man first set foot upon the moon (July 20, 1969), 
+    or William Shakespeare was born (April 26, 1594). 
+    Impress friends and family by naming the weekdays of important personal events.
+  \end{abstract}
+
+% Making whitespace
+  \begin{enumerate} \item[] \item[] \item[] \end{enumerate}
+
+  \tableofcontents
+\newpage
+  \section{Introduction to Modular Arithmetic}
+    These calendar calculations are based on a concept called modular arithmetic. 
+    In modular arithmetic, numbers do not go on forever. 
+    Instead, they “reset” once they reach a certain value. 
+    This value is called the \emph{modulus}. 
+    Like the numbers on a clock or the number of days in a week, counting numbers 
+    in modular arithmetic repeat a set pattern.
+
+    For example, in a module 3 system, we would count 
+    0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2 . . . 
+    and in a module 10 system, we would count 
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, . . . 
+    Notice how the numbers start off like our counting numbers do, 
+    beginning at zero and increasing one by one, but never reach the modulus. 
+    In fact, the module 10 numbers match the numbers in the ones' place of our 
+    base-10 counting numbers. 
+    Compare our counting numbers to the module 10 system in the following table:\\\\
+    \begin{center}
+    \begin{tabular}{| c | c || c | c |}\hline
+      Counting & Module 10 & Counting & Module 10 \\\hline\hline
+      0 & 0 & 20 & 0 \\\hline
+      1 & 1 & 21 & 1 \\\hline
+      2 & 2 & 22 & 2 \\\hline
+      3 & 3 & 23 & 3 \\\hline
+      4 & 4 & 24 & 4 \\\hline
+      5 & 5 & 25 & 5 \\\hline
+      6 & 6 & 26 & 6 \\\hline
+      7 & 7 & 27 & 7 \\\hline
+      8 & 8 & 28 & 8 \\\hline
+      9 & 9 & 29 & 9 \\\hline
+      10 & 0 & 30 & 0 \\\hline
+      11 & 1 & 31 & 1 \\\hline
+      12 & 2 & 32 & 2 \\\hline
+      13 & 3 & 33 & 3 \\\hline
+      14 & 4 & 34 & 4 \\\hline
+      15 & 5 & 35 & 5 \\\hline
+      16 & 6 & 36 & 6 \\\hline
+      17 & 7 & 37 & 7 \\\hline
+      18 & 8 & 38 & 8 \\\hline
+      19 & 9 & 39 & 9 \\\hline
+    \end{tabular}
+    \end{center}
+\newpage
+    In fact, we can define a new elementary operation 
+    (like addition, subtraction, multiplication, and division) 
+    called the modulus. We will use the symbol \% as shorthand for writing out 
+    “modulus” or the shorter “mod”. The modulus of a number will be equal to that 
+    number's value in a module system. For example, here are a few numbers modulus 10:\\
+
+    \begin{center}
+      \begin{tabular}{c c c}
+        $39 \ \% \ 10 = 9$  & $\ \ \ $ & $11 \ \% \ 10 = 1$\\
+        $5 \ \% \ 10 = 5$   & $\ \ \ $ & $400 \ \% \ 10 = 0$\\
+        $405 \ \% \ 10 = 5$ & $\ \ \ $ & $444 \ \% \ 10 = 4$
+      \end{tabular}
+    \end{center}
+
+    Notice how these equations match the table above.
+    The number 39, in the module 10 system, has the value 9. 
+    If you were to extend the table to reach 444, 
+    you would find that the 444th value in the module 10 system is 4. 
+    But there is a faster way to find any number's value in any module system.
+
+    \begin{center}
+      \textbf{For any two numbers A and B, A \% B is the remainder of A / B}
+    \end{center}
+
+    For the numbers A = 444 and B = 10, 444 \% 10 equals the remainder of $\frac{444}{10}$. 
+    $\frac{444}{10} = 44$ remainder 4, so 444 \% 10 = 4. 
+    In another example, 7 \% 5 = remainder of $\frac{7}{5}$. 
+    $\frac{7}{5} = 1$ remainder 2, so 7 \% 5 = 2.\\
+%    This is all we need to know to do the calendar computations, 
+%    but if you want to learn more about modular arithmetic, 
+%    check these articles at the Math Explorers' page (link) and Wikipedia (link).
+%    Further reading section
+
+    \begin{center}
+    \fbox{
+      \minibox{
+        \textbf{Activity}: Compute the following modulus operations\\
+        \small{Hint: You can use the google search bar to check your answers}\\\\
+        \begin{tabular}{c c c c c c}
+          $\ \ \ \ $ & 15 \% 5 & 1 \% 99 & 10 \% 3 & 25 \% 6 & 3 \% 1 \\
+          $\ \ \ \ $ & 24 \% 7 & 32 \% 4 & 70 \% 5 & 14 \% 2 & 8 \% 5
+        \end{tabular}
+      }
+    }
+    \end{center}
+
+\newpage
+  \section{January $1^{st}$ of the $21^{st}$ century}
+    Now that you know how to take the modulus of a number, 
+    let's use that skill to figure what day of the week New Years Day was\textemdash
+    or will be\textemdash for any year from 2000 to 2099. 
+    This is a simple, quick calculation; with a little practice, 
+    you'll be able to do it accurately without paper, pencil, or calculator! 
+    More importantly, it's the first step toward finding the weekday of any date in history.
+  ￼￼￼￼￼
+    First, we need to map the days of the week to numbers in a module system. 
+    There are 7 days in a week, so we will use the module 7 system to build the mapping.\\
+
+%    \begin{center}
+%      \begin{tabular}{|c | c|}\hline
+%        Sunday & 0 \\\hline
+%        Monday & 1 \\\hline
+%        Tuesday & 2 \\\hline
+%        Wednesday & 3 \\\hline
+%        Thursday & 4 \\\hline
+%        Friday & 5 \\\hline
+%        Saturday & 6 \\\hline
+%      \end{tabular}
+%    \end{center}
+    \begin{center}
+      \begin{tabular}{|c | c | c | c | c | c | c|}\hline
+        Sunday & Monday & Tuesday & Wednesday & Thursday & Friday &  Saturday \\\hline
+        0 & 1 & 2 & 3 & 4 & 5 & 6  \\\hline
+      \end{tabular}
+    \end{center}
+
+    Use this table for reference as you learn these techniques, and memorize it. 
+    If it helps, remember that Monday, with code 1, is the first (1) day of the 
+    week that you have to go to school. Then the other days progress one-by-one 
+    after Monday, and reset to zero (0) on Sunday.\\\\
+
+    In order to find the day of the week of January $1^{st}$, $20ab$ 
+    (where $a$ and $b$ are integers):
+    \begin{itemize} \item[] \begin{enumerate}
+      \item Take the two-digit number $ab$, add 1 and then divide the result by 4. 
+            Ignore the remainder.\footnote{Example: $\frac{25 + 1}{4} = 6$ remainder 2. 
+            Ignoring the remainder, our answer is 6.}
+      \item Add the answer to the number $ab$
+      \item Take the modulus 7 of this value
+      \item Add 6 to the answer
+      \item The day of the week is the day that matches this value in the table above
+      \item[]
+    \end{enumerate}\end{itemize}
+
+    Here is a worked-out example for January 1st, 2067:
+    \begin{itemize} \item[] \begin{enumerate}
+      \item 2067 is of form 20ab, so 'ab' = 67.\\
+            We add $1$ to 'ab' to get 68 \\
+            $\frac{68}{4} = 17$ remainder 0. Let d = 17.
+      \item $(ab + d) \ \% \ 7 = (67 + 17) \ \% \ 7$
+            $67 + 16 = 84$, $84 \ \% \ 7 = 0$
+      \item $0 + 6 = 6$
+      \item 0 maps to Saturday. Jan 1, 2067 will be a Saturday
+      \item[]
+    \end{enumerate}\end{itemize}
+
+    \begin{center}
+      \fbox{
+        \minibox{
+          \textbf{Activity}: what day of the week was / will be New Year's Day in the years\\
+          \begin{tabular}{c c c c c c c}
+           $\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ $ & 2001 & 2006 & 2020 & 2050 & 2052 & 2099
+          \end{tabular}
+        }
+      }
+    \end{center}
+
+\newpage
+
+  \section{Any weekday in the $21^{st}$ century}
+  Now that we know how to find the day of Jan. $1^{st}$ in the $21^{st}$ century, 
+  we can find a more general rule to work for any day of the $21^{st}$ century. 
+  This process of starting from a specific case and working towards a general rule 
+  is called \emph{induction}; it is a crucial tool for mathematicians.
+
+  The computation here is a bit shorter than the one used for the special case above, 
+  but requires two more data tables, in addition to the day codes.\\\\
+
+  \begin{minipage}{0.5\linewidth}
+    \centering
+    \begin{tabular}{| c | c |}\hline
+      Month & Code \\\hline\hline
+      January & 6 (5 in leap years) \\\hline
+      February & 2 (1 in leap years) \\\hline
+      March & 2 \\\hline
+      April & 5 \\\hline
+      May & 0 \\\hline
+      June & 3 \\\hline
+      July & 5 \\\hline
+      August & 1 \\\hline
+      September & 4 \\\hline
+      October & 6 \\\hline
+      November & 2 \\\hline
+      December & 4 \\\hline
+    \end{tabular}
+  \end{minipage}
+  \begin{minipage}{0.5\linewidth}
+    \centering
+    \begin{tabular}{| c | c |}\hline
+      Year & Code \\\hline\hline
+      2000 & 0 \\\hline
+      2001 & 1 \\\hline
+      2002 & 2 \\\hline
+      2003 & 3 \\\hline
+      2004 & 5 \\\hline
+      2005 & 6 \\\hline
+      2006 & 0 \\\hline
+      2007 & 1 \\\hline
+      2008 & 3 \\\hline
+      2009 & 4 \\\hline
+      2010 & 5 \\\hline
+      2011 & 6 \\\hline
+    \end{tabular}
+  \end{minipage}\\\\
+
+  First, lets analyze the table of year codes. 
+  There are only twelve codes in the table, but you can easily extend it. 
+  Given the code of any year:
+  \begin{itemize} \item[] \begin{enumerate}
+    \item Add 1 to that code. Reset to zero if value equal 7.
+    \item If the next year is a leap year, add 1 to the new code
+          Just don't forget to “reset” the code when the value exceeds 6.
+    \item[]
+  \end{enumerate}\end{itemize}
+  As an example, let's find the code for 2012. Given the code of 2011 = 6:
+  \begin{itemize} \item[] \begin{enumerate}
+    \item Add 1 to code of 2011. 6 + 1 = 7. Reset to 0.
+    \item Is 2012 a leap year? $2012 \ \% \ 4 = 0$. It is a leap year. Add 1 to new code.
+    \end{enumerate}
+    \item[] The code for 2012 is 1.
+  \end{itemize}
+  Try working through the above steps on your own to find the code for 2013.
+
+\newpage
+
+  This is great, but what if we want the code for 2099? 
+  Are we supposed to create a data table from 2000 to 2099? 
+  Of course not! There's a faster way. 
+  To determine the code for any year in the 21st century without creating a table:
+  \begin{itemize} \item[] \begin{enumerate}
+    \item Find the number of leap years before and including this year
+    \item Add that result to the last two digits of the year
+    \item Take the modulus 7 of the answer
+    \item[]
+  \end{enumerate}\end{itemize}
+  For the year 2012, the last two digits are 12. 
+  To find the number of leap years, we can work through a multiplication table:
+  \begin{center}  
+  \begin{tabular}{| c | c | c |}\hline
+%    * & 1 & 2 & 3 \\\hline\hline
+%    4 & 4 & 8 & 12 \\\hline
+    $4 * 1 = 4$ & $4 * 2 = 8$ & $4 * 3 = 12$\\\hline
+  \end{tabular}
+  \end{center}
+
+  Our last two digits = 12, so we stop here, but include that result. 
+  Three (3) is the biggest number we found using the table, 
+  so we conclude there have been 3 leap years so far in the 21st century. 
+  Now we add the number of leap years and the last two digits of 2012 to get $3 + 12 = 15$.
+  Final answer $= 15 \ \% \ 7 = 1$.\footnote{You could extend 
+  the year table above to verify this answer.}
+
+% Just making some whitespace
+  \begin{itemize} \item[] \end{itemize}
+
+  One more example: the year 2089. 
+  First, we need to find the number of leap years up to and including 2089.
+  We could work through the multiplication table as in the previous example, 
+  or we could use division as a shortcut.
+  $\frac{89}{4} = 22$ remainder 1. 
+  4 goes in to 89 twenty-two times, so we conclude there were 22 leap years before 2089.
+  Adding the last two digits to this answer, we get 89 + 22 = 111. 
+  Final answer $= 111 \ \% \ 7 = 6$. The year code for 2089 is 6.
+
+\newpage
+
+  The month codes are more straightforward. 
+  Except for January and February, whose values decrease by $1$ in leap years, 
+  they do not change from year to year. 
+  Nevertheless, memorizing the month codes presents a challenge. 
+  The following mnemonics might help you remember:\footnote{But you're encouraged to create
+  your own!}
+  \begin{enumerate} \item[] \begin{itemize}
+    \item January (6): January is the first full month of winter. 
+          Winter has 6 letters \& January has code 6. 
+    \item February (2): It's the 2nd month, and Groundhog's Day is Feb. 2nd. 
+          February has code 2.
+    \item March (2): In like a lion, out like a lamb. 
+          One lion + one lamb = 2 animals. March has code 2. 
+    \item April (5): Five letters in “April,” April has code 5.
+    \item May (0): Cinco de Mayo is in May. Think “May-O”. May has code 0.
+    \item June (3): June is the first of 3 months of summer vacation. June has code 3
+    \item July (5): On Independence Day, fireworks fly. Think “fireworks fly five.” 
+          July has code 5. 
+    \item August (1): August begins with an “A”, the 1st letter of the alphabet. 
+          A is \#1, August has code 1. 
+    \item September (4): Fall begins in September. Fall has 4 letters \& September has code 4.
+    \item October (6): 666 is the number of the beast. 
+          Demons play on Halloween, October has code 6 
+    \item November (2): Election day is always a Tuesday in November. Tuesday, 2's-day. 
+          November, 2. 
+    \item December (4): December is the holiday month. 
+          Holidays for all. 4-all. December is code 4
+    \item[]
+  \end{itemize} \end{enumerate}
+
+  Putting it all together, you can get the weekday of a date by taking the modulus 7 of 
+  the sum of a date's: year code + month code + day. 
+  The month code and year code come from the tables above; the day is simply the day. 
+  To find which day of the week August 12, 2009 fell on, just solve:
+  
+  \begin{center}
+    (Year Code + Month Code + Day Code) \% 7 \\
+    month code = 1\\
+    day = 12\\
+    year code = 4\\
+    ( 1 + 12 + 4 ) \% 7\\
+    17 \% 7 = 3\\
+    3 maps to Wednesday. August 12, 2009 was a Wednesday.\\
+  \end{center}
+
+% whitespace
+  \begin{enumerate} \item[] \item[] \end{enumerate}
+
+  \begin{center}
+    \fbox{
+      \minibox{
+        \textbf{Activity}: Find day of the week of these dates\\
+        \begin{tabular}{c c c c c}
+          Mar 12, 2031 & Feb. 9, 2006 & Nov. 2, 2099 & July 4, 2042 & May 28, 2053
+        \end{tabular}
+      }
+    }
+  \end{center}
+
+\newpage
+
+  \section{Compute any weekday in any century}
+  Here it is, the main attraction: determine the day of the week of 
+  any date in the history of the world! 
+  We'll take our knowledge from the previous sections and add one last generalization.
+
+  So far we have tables for day codes, month codes, and 21st century year codes. 
+  We need a new table that will give us the year codes for the first year in any century. 
+  Let's call these “century codes” for short.
+  Recall that we found the year codes for the 21st century by 
+  finding the day code of January $1^{st}$, 2000 and advancing that value by 1. 
+  We could apply this same rule to find the year codes for the first year of any century, 
+  but we would first need to know the day of the week that January 1st fell on each century. 
+  You can either look online and research these dates, or you can use the following formula:
+
+  \begin{center}
+  \textbf{For any century, let the first two digits equal C. 
+  Then the century code for\\ 
+  January 1st of that century is: (1 + (2 * (3 – (C \% 4)))) \% 7.}\\
+  \end{center}
+
+  Working step-by-step:
+  \begin{itemize} \item[] \begin{enumerate}
+    \item Take the first two digits of the century to get C (For 1983, C = 19)
+    \item Solve C \% 4
+    \item Subtract: 3 minus answer from step 2
+    \item Multiply: 2 * your answer from step 3
+    \item Add 1 to this value
+    \item Take modulus 7 for final result
+    \item[]
+  \end{enumerate}\end{itemize}
+
+  Using the 21st century (2000 – 2099):
+  \begin{itemize} \item[] \begin{enumerate}
+    \item $C = 20$
+    \item $C \ \% \ 4= 0$
+    \item $3–0= 3$
+    \item $2*3= 6$
+    \item $6+ 1= 7$
+    \item $7 \ \% 7= 0$
+    \item[]
+  \end{enumerate}\end{itemize}
+
+  In conclusion, the century code for the 21st century is 0. 
+  Notice that this number matches the year code for 2000. 
+  Also, the 6 above (result of $2 * 3 – (C\%4)$) is the day code of January 1st, 2000. 
+  This is no coincidence!
+
+\newpage
+
+  One more example: let's find the code for the 18th century (1700-1799)
+  \begin{itemize} \item[] \begin{enumerate}
+    \item $C = 17$
+    \item $C \ \% \ 4= 1$
+    \item $3–1= 2$
+    \item $2*2= 4$
+    \item $4 + 1 = 5$
+    \item $5 \ \% \ 7 = 5$
+  \end{enumerate}\end{itemize}
+  The century code for the 18th century is 5.
+
+  \begin{center}
+    \fbox{
+      \minibox{
+        \textbf{Activity}: 
+        Computer the century codes for the $19^{th}$ and $20^{th}$ centuries
+      }
+    }
+  \end{center}
+
+  \begin{center}
+  \begin{tabular}{| c | c |}\hline
+    Century & Code \\\hline\hline
+    $18^{th} (1700-1799)$ & 5 \\\hline
+    $19^{th} (1800-1899)$ &   \\\hline
+    $20^{th} (1900-1999)$ &   \\\hline
+    $21^{st} (2000-2099)$ & 0 \\\hline
+  \end{tabular}
+  \end{center}
+
+\newpage
+
+    We're almost done! The last step is to find the year code for any year. 
+    Recall how we found the year codes for any year in the 21st century without using a table.
+    \begin{itemize} \item[] \begin{enumerate}
+      \item Take the last 2 digits of the year
+      \item Add the number of leap years up to \& including that year
+      \item Take the modulus 7 of the answer
+      \item[]
+    \end{enumerate} \end{itemize}
+    Using these century codes, the formula to get the day of the week of any day in history is:
+    \begin{center}
+      (Century Code + Year Code + Month Code + Day) \% 7
+    \end{center}
+
+    One last example problem: find the day of the week of July 4, 1776.
+    \begin{center}
+      Century Code = 5\\
+      Year Code = (76 + ($\frac{76}{4}$)) \% 7 = (76 + 19) \% 7 = 95 \% 7 = 4\footnote{I 
+        took a shortcut here. See the term $\frac{76}{4}$? 
+        That's to find the number of leap years up to and including 1776. 
+        Normally, we want to ignore the remainder of this answer, but 4 divides evenly into 76,
+        so there is no remainder. If the term were 77 / 4 = 19 remainder 1, 
+        we would drop the remainder and arrive at the same answer of 19.}\\
+      Month Code = 5\\
+      Day = 4\\
+    Final Answer = (Century code + Year code + Month code + Day) \% 7 (5 + 4 + 5 + 4) \% 7\\
+    18 \% 7\\
+    4\\
+    \end{center}
+    The day code 4 matches Thursday. 
+    Congress approved the Declaration of Independence on a Thursday!
+
+    With practice, you'll memorize the century codes, month codes, and day codes. 
+    Then when someone asks you the weekday of a date (from the past or future), 
+    all you'll need to do is calculate the year code and put it all together.
+
+    \begin{center}
+      \fbox{
+        \minibox{
+          \textbf{Activity}: Find the weekday these dates fell on\\
+            \begin{tabular}{c c c}
+              Oct 27, 1858 & May 5, 1862 & April 9, 1865\\
+              Dec. 15 1911 & April 14, 1912 & Dec 7, 1941\\
+            \end{tabular}
+          Bonus: Research the significance of these dates
+        }
+      }
+    \end{center}
+
+\newpage
+
+  \section{Why Does This Work?}
+  We are mathematicians. We want to understand why things work. 
+  “Just because” is not an acceptable answer, and we don't believe in magic. 
+  We seek explanations—even if they contradict our sense of what is “right” or “normal”. 
+  So what's the rule behind these calendar computations?
+  \begin{enumerate}
+    \item Each week has 7 days. Each year has 365 or 366 days. 
+          365 and 366 are very close to 364, which is a multiple of 7. 
+          So any day that takes place on a Monday one year will take place on a Tuesday 
+          if the next year is not a leap year, and on a Wednesday if it is a leap year. 
+          Notice that these “steps”, +1 for normal years and +2 for leap years, 
+          match the “steps” we used in the table of year codes.
+          As a side note, if our years had 364 days 
+          (or any other number of days X such that X \% 7 = 0), 
+          every date would fall on the same day of the week every year!
+    \item Modular arithmetic makes the calculations possible for any date 
+          (not just numbers less than 7). 
+          It's a fascinating topic, but beyond the scope of this article. You are 
+          strongly encouraged to study it further!
+  \end{enumerate}
+\end{document}
