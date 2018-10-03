@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)http://blog.racket-lang.org/2017/04/type-tailoring.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    
+    <title>Type Tailoring</title>
+    <meta name="description" content="_posted by Ben Greenman_  Type tailoring is a technique for adding _domain-specific_ type checkers to a  typed host language. Using the _Type Systems as Macros_ approach to building typed languages,  implementing type tailoring in Typed Racket is straight...">
+    <meta name="author" content="The Unknown Author">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="http://blog.racket-lang.org/favicon.ico">
+    <link rel="canonical" href="http://blog.racket-lang.org/2017/04/type-tailoring.html">
+    <link rel="next" href="http://blog.racket-lang.org/2017/03/languages-as-dotfiles.html">
+    <link rel="prev" href="http://blog.racket-lang.org/2017/04/racket-v6-9.html">
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="./src/main.css">
+    <link rel="stylesheet" type="text/css" href="./src/blog-fonts.css">
+    <!-- Feeds -->
+    <link rel="alternate" type="application/atom+xml" href="http://blog.racket-lang.org/feeds/all.atom.xml" title="Atom Feed">
+    <link rel="alternate" type="application/rss+xml" href="http://blog.racket-lang.org/feeds/all.rss.xml" title="RSS Feed">
+    <!-- JS -->
+    </head>
+  <body>
+<row class="one-column" id="logo"><col-1><a href="http://racket-lang.org/"><div id="logo-container"><img id="logo" src="./src/racket-logo.svg"> Racket</div></a></col-1><col-2><p><a href="http://blog.racket-lang.org/index.html">blog</a></p></col-2></row>
+<article>
+<row>
+
+<col-1>
+  <p class="date-and-tags">18 Apr 2017</p>
+
+</col-1>
+
+<col-2>
+  <header>
+  <h1>Type Tailoring</h1>
+  </header>
+
+<p><em>posted by Ben Greenman</em></p>
+
+<p>Type tailoring is a technique for adding <em>domain-specific</em> type checkers to a  typed host language. Using the <a href="http://www.ccs.neu.edu/home/stchang/popl2017/"><em>Type Systems as Macros</em></a> approach to building typed languages,  implementing type tailoring in Typed Racket is straightforward. Any library can apply the core idea, and you can try programming with  type tailorings by downloading the <a href="https://pkgd.racket-lang.org/pkgn/package/trivial"><code>trivial</code></a> package  (requires Racket v6.4 or later).</p>
+<!-- more-->
+
+<h2 id="background-programming-the-type-elaborator">Background: Programming the Type Elaborator</h2>
+
+<p>Many typed languages include both a type checker and a <em>type elaborator</em>. The type elaborator translates source code to an <a href="http://www.lfcs.inf.ed.ac.uk/reports/87/ECS-LFCS-87-42/ECS-LFCS-87-42.pdf">explicitly typed</a> representation for the type checker to validate. Normally, programmers cannot extend the behavior of the type elaborator  without modifying the compiler.</p>
+
+<p>In <a href="http://docs.racket-lang.org/ts-reference/index.html">Typed Racket</a>, the Racket macro expander serves as a type elaborator. A fully-expanded Typed Racket program is valid input to the type checker. This design makes Typed Racket <em>macro-extensible</em>; programmers can write their  own macros to <a href="https://www.youtube.com/watch?v=_ahvzDzKdB0">grow</a> the syntax of the language. More on this in a minute.</p>
+
+<p>Recently, <a href="https://ccs.neu.edu/home/stchang">Stephen Chang</a> observed  that individual macros can implement the same pipeline as Typed Racket —  macros can expand their sub-terms and perform static checks on the results. Such macros are essentially type rules, and  a well-designed library of such macros is essentially a type system. Hence <a href="http://www.ccs.neu.edu/home/stchang/popl2017/"><em>Type Systems as Macros</em></a>: a library for building  typed, domain-specific languages (DSLs) using the Racket macro system.</p>
+
+<p><em>Type tailoring</em> is programming a language’s type elaborator to implement  <em>domain-specific typing rules</em> on top of an existing type system. Any language that lets programmers extend the behavior of its type elaborator  supports type tailoring. In particular, Typed Racket programmers can use the  <em>Type Systems as Macros</em> technique to implement tailored APIs as macros. These macros can statically check properties of source code, communicate  the results of their checks to other macros, and expand to type annotated  code for the Typed Racket type checker.</p>
+
+<p>As we will see, type tailoring can even extend a “conventional” typed language  with static checks that would otherwise require dependent types.</p>
+
+<h2 id="case-study-regular-expressions">Case Study: Regular Expressions</h2>
+
+<h3 id="brush-racketregexp-match-in-racket"><code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code> in Racket</h3>
+
+<p>Racket’s <a href="http://docs.racket-lang.org/reference/regexp.html">regular expression library</a>  will match a string, path, byte string, or input port  against a given pattern.</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span>  <span class="n">$</span> <span class="n">racket</span>
+  <span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e))" style="color: inherit">&gt;</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span> <span class="s2">"r"</span> <span class="s2">"racket"</span><span class="p">)</span>
+  <span class="c1">; '("r")</span>
+  <span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e))" style="color: inherit">&gt;</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span> <span class="s2">"z"</span> <span class="s2">"racket"</span><span class="p">)</span>
+  <span class="c1">; #f</span>
+  <span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e))" style="color: inherit">&gt;</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span> <span class="s2">"r|z"</span> <span class="s2">"racket"</span><span class="p">)</span>
+  <span class="c1">; '("r")</span>
+  <span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e))" style="color: inherit">&gt;</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/port-lib.html#(def._((lib._racket/port..rkt)._with-input-from-string))" style="color: inherit">with-input-from-string</a></span> <span class="s2">"hello world"</span>
+      <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/lambda.html#(form._((lib._racket/private/base..rkt)._~ce~bb))" style="color: inherit">λ</a></span> <span class="p">()</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span> <span class="s2">"hello (.*)$"</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/port-ops.html#(def._((quote._~23~25kernel)._current-input-port))" style="color: inherit">current-input-port</a></span><span class="p">))))</span>
+  <span class="c1">; '(#"hello world" #"world")</span>
+</pre></div>
+
+</div>
+
+<br>
+
+<p>The result of matching a pattern against an input source is <code>#f</code> if  no part of the input matched the pattern. Otherwise, the result is a pair containing:</p>
+
+<ul>
+ <li>the subsequence of the input that matched the pattern, and</li>
+ <li>a list of subsequences that were captured by parenthesized sub-patterns in  the pattern (<em>capture groups</em>).</li></ul>
+
+<p>Note that a capture group may fail to capture any subsequence. If this happens, the list of subsequences contains <code>#f</code> in the  corresponding position.</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span>  <span class="n">$</span> <span class="n">racket</span>
+  <span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e))" style="color: inherit">&gt;</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span> <span class="s2">"(r)|(z)"</span> <span class="s2">"racket"</span><span class="p">)</span>
+  <span class="c1">; '("r" "r" #f)</span>
+</pre></div>
+
+</div>
+
+<br>
+
+<h3 id="brush-racketregexp-match-in-typed-racket"><code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code> in Typed Racket</h3>
+
+<p>Typed Racket includes a type signature for <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code> that accepts  the same variety of input sources, but conservatively rejects some “correct”  uses of the output.</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span>  <span class="n">$</span> <span class="n">racket</span> <span class="m">-I</span> <span class="n">typed/racket</span>
+  <span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e))" style="color: inherit">&gt;</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span> <span class="s2">"(a*)b"</span> <span class="s2">"aaabbb"</span><span class="p">)</span>
+  <span class="c1">; - : (U False (Pairof String (Listof (U False String))))</span>
+  <span class="c1">; '("aaab" "aaa")</span>
+
+  <span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e))" style="color: inherit">&gt;</a></span> <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/let.html#(form._((lib._racket/private/letstx-scheme..rkt)._let))" style="color: inherit">let</a></span> <span class="p">([</span><span class="n">m</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span> <span class="s2">"(a*)b"</span> <span class="s2">"aaabbb"</span><span class="p">)])</span>
+    <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/when_unless.html#(form._((lib._racket/private/letstx-scheme..rkt)._when))" style="color: inherit">when</a></span> <span class="n">m</span>
+      <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-length))" style="color: inherit">string-length</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((lib._racket/list..rkt)._second))" style="color: inherit">second</a></span> <span class="n">m</span><span class="p">))))</span>
+  <span class="c1">; Type Checker: Polymorphic function `second' could not be applied to arguments:</span>
+  <span class="c1">;   ....</span>
+  <span class="c1">; Arguments: (Pairof String (Listof (U False String)))</span>
+  <span class="c1">; Expected result: String</span>
+  <span class="c1">;   in: (second m)</span>
+</pre></div>
+
+</div>
+
+<br>
+
+<p>The issue is that <code><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-length))" style="color: inherit">string-length</a></code> expects a string, but Typed Racket  reasons that the call to <code><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((lib._racket/list..rkt)._second))" style="color: inherit">second</a></code> might return a string or false. One solution is to guard the value <code>(second m)</code> with a dynamic check. Another is to apply type tailoring to <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>!</p>
+
+<h3 id="type-tailored-brush-racketregexp-match">Type Tailored <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code></h3>
+
+<p>We can implement a type-tailored interface to <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>  with a macro that:</p>
+
+<ul>
+ <li>checks whether its first argument is a string literal</li>
+ <li>counts the number of matched parentheses in the string literal</li>
+ <li>expands to <em>code designed to convince Typed Racket</em> that the result is a list  with the proper number of arguments.</li></ul>
+
+<p>The third point is crucial, and demonstrates how type tailoring can translate  program properties that are <em>implicit</em> in the source code to facts that  the type checker can understand.</p>
+
+<p>Here is the macro:</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define-syntax))" style="color: inherit">define-syntax</a></span> <span class="p">(</span><span class="n">smart-match</span> <span class="n">stx</span><span class="p">)</span>
+  <span class="p">(</span><span class="n"><a href="http://docs.racket-lang.org/syntax/Parsing_Syntax.html#(form._((lib._syntax/parse..rkt)._syntax-parse))" style="color: inherit">syntax-parse</a></span> <span class="n">stx</span>
+   <span class="p">[(</span><span class="k"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt).__))" style="color: inherit">_</a></span> <span class="n">pattern:str</span> <span class="n">other-args</span> <span class="k"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt)._......))" style="color: inherit">...</a></span><span class="p">)</span>
+    <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a></span> <span class="n">num-groups</span> <span class="p">(</span><span class="n">count-groups</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/stxops.html#(def._((quote._~23~25kernel)._syntax-e))" style="color: inherit">syntax-e</a></span> <span class="o">#`</span><span class="n"><a href="http://docs.racket-lang.org/syntax/stxparse-specifying.html#(form._((lib._syntax/parse..rkt)._pattern))" style="color: inherit">pattern</a></span><span class="p">)))</span>
+    <span class="o">#`</span><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/let.html#(form._((lib._racket/private/letstx-scheme..rkt)._let))" style="color: inherit">let</a></span> <span class="p">([</span><span class="n">m</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span> <span class="n"><a href="http://docs.racket-lang.org/syntax/stxparse-specifying.html#(form._((lib._syntax/parse..rkt)._pattern))" style="color: inherit">pattern</a></span> <span class="n">other-args</span> <span class="k"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt)._......))" style="color: inherit">...</a></span><span class="p">)])</span>
+        <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a></span> <span class="n">m</span>
+          <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._list))" style="color: inherit">list</a></span>
+            <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._car))" style="color: inherit">car</a></span> <span class="n">m</span><span class="p">)</span>
+            <span class="o">#,@</span><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/list))" style="color: inherit">for/list</a></span> <span class="p">([</span><span class="n">i</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/sequences.html#(def._((lib._racket/private/base..rkt)._in-range))" style="color: inherit">in-range</a></span> <span class="n">num-groups</span><span class="p">)])</span>
+                 <span class="o">#`</span><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._list-ref))" style="color: inherit">list-ref</a></span> <span class="n">m</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._+))" style="color: inherit">+</a></span> <span class="mi">1</span> <span class="o">#,</span><span class="n">i</span><span class="p">))</span>
+                       <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/exns.html#(def._((quote._~23~25kernel)._error))" style="color: inherit">error</a></span> <span class="o">'</span><span class="ss">smart-match</span><span class="p">))))</span>
+          <span class="n">m</span><span class="p">))]</span>
+   <span class="p">[(</span><span class="k"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt).__))" style="color: inherit">_</a></span> <span class="n">args</span> <span class="k"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt)._......))" style="color: inherit">...</a></span><span class="p">)</span>
+    <span class="o">#`</span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span> <span class="n">args</span> <span class="k"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt)._......))" style="color: inherit">...</a></span><span class="p">)]</span>
+   <span class="p">[</span><span class="k"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt).__))" style="color: inherit">_</a></span>
+    <span class="o">#`</span><span class="nb"><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></span><span class="p">]))</span>
+</pre></div>
+
+</div>
+
+<br>
+
+<blockquote>
+ <p>Scroll to the bottom of this post for an implementation of <code>count-groups</code>.</p></blockquote>
+
+<p>Quick guide to reading the macro:</p>
+
+<ul>
+ <li><code><a href="http://docs.racket-lang.org/syntax/Parsing_Syntax.html#(form._((lib._syntax/parse..rkt)._syntax-parse))" style="color: inherit">syntax-parse</a></code> is a pattern-matcher, the three clauses match possible uses of <code>smart-match</code></li>
+ <li>
+  <tt>#`</tt> is a constructor for <a href="http://docs.racket-lang.org/reference/syntax-model.html#%28tech._syntax._object%29">syntax objects</a></li>
+ <li>the <code>#,@(for/list ....)</code> term escapes to Racket’s <code><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/list))" style="color: inherit">for/list</a></code>  combinator to build a list of syntax objects, then splices the generated  syntax into the program — as if the programmer had written out a list  with <code>num-groups</code> elements</li></ul>
+
+<p>And here is a “client side” use of the macro:</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span>  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/let.html#(form._((lib._racket/private/letstx-scheme..rkt)._let))" style="color: inherit">let</a></span> <span class="p">([</span><span class="n">m</span> <span class="p">(</span><span class="n">smart-match</span> <span class="s2">"(a*)b"</span> <span class="s2">"aaabbb"</span><span class="p">)])</span>
+    <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/when_unless.html#(form._((lib._racket/private/letstx-scheme..rkt)._when))" style="color: inherit">when</a></span> <span class="n">m</span>
+      <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-length))" style="color: inherit">string-length</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((lib._racket/list..rkt)._second))" style="color: inherit">second</a></span> <span class="n">m</span><span class="p">))))</span>
+  <span class="c1">; 3</span>
+</pre></div>
+
+</div>
+
+<br>
+
+<p>It’s exactly the result we want, and one renaming away from the  code we want to write.</p>
+
+<h3 id="improving-brush-racketsmart-match">Improving <code>smart-match</code></h3>
+
+<p>Our <code>smart-match</code> has a few obvious limitations. First, it reports an error if a capture group fails to capture a string. Second, it fails to tailor calls where the pattern is a byte string  or regular expression literal. In the cases, <code>smart-match</code> defaults to Typed Racket’s  <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>. Third, it fails to tailor calls where the pattern is a variable.</p>
+
+<p>The first problem is easy to fix by changing <code>count-groups</code> to return  a list of <code>num-groups</code> booleans encoding whether each capture group  definitely or maybe captures a string when the overall match is successful. The second problem is also just a matter of engineering.</p>
+
+<p>For the third problem, we can use the <em>Type Systems as Macros</em> technique  of using the macro expander to replace bound occurrences of a variable  with type-annotated variables. The domain-specific type we attach describes the capture groups; for example,  given the variable declaration:</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span>  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a></span> <span class="n">x</span> <span class="sr">#rx"([a-z]+)@gmail\\.com"</span><span class="p">)</span>
+</pre></div>
+
+</div>
+
+<br>
+
+<p> the type annotation is <code>'(#t)</code> because it contains one capture group  that is certain to capture a string when used in a successful  <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>. This annotation can be attached to occurrences of <code>x</code> at expansion-time  as a <a href="http://docs.racket-lang.org/reference/stxprops.html#%28tech._syntax._property%29">syntax property</a>  for <code>smart-match</code> to extract.</p>
+
+<blockquote>
+ <p> The <a href="http://docs.racket-lang.org/trivial/index.html"><code>trivial</code></a> package includes a tailored  <a href="http://docs.racket-lang.org/trivial/index.html#%28def._%28%28lib._trivial%2Fregexp..rkt%29._regexp-match%29%29"><code></code></a><code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>  that addresses all three issues.  Note: the fix for the third issue changes the expansion-time meaning of <code><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a></code>  to infer and propagate domain-specific types.</p></blockquote>
+
+<h3 id="practical-benefits">Practical Benefits</h3>
+
+<p>Now that we’ve thoroughly criticized <code>smart-match</code>, it’s worth pointing  out its strengths.</p>
+
+<ul>
+ <li><code>smart-match</code> does <strong>not</strong> re-implement regular expression matching.  It re-uses Racket’s existing, correct, and performant <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>.</li>
+ <li><code>smart-match</code> supports the existing syntax for regular expressions.</li>
+ <li><code>smart-match</code> validates some programs that Typed Racket conservatively  rejects.</li>
+ <li><code>smart-match</code> rejects some programs that Typed Racket would accept,  yet evaluate to runtime errors — for instance, <code>(second (regexp-match "r" "racket"))</code>.</li></ul>
+
+<p>Lastly, the use of <code><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._list-ref))" style="color: inherit">list-ref</a></code> exploits its conservative type to improve  the conservative type of <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>. Whether you find this use clever or brittle, it is a proof to Typed Racket that  does not resort to type casts.</p>
+
+<blockquote>
+ <p>Implementing general <em>type checker plugins</em> that can convince the host  type system of their correctness is a hard problem. I know of three high-quality type checker plugins for Haskell, and all three  assert their correctness to GHC  (<a href="https://github.com/yav/type-nat-solver"><code>type-nat-solver</code></a>,  <a href="https://github.com/christiaanb/ghc-typelits-natnormalise"><code>natnormalize</code></a>, and  <a href="https://github.com/adamgundry/uom-plugin"><code>uom-plugin</code></a>).</p></blockquote>
+
+<h2 id="comparison-dependently-typed-haskell">Comparison: Dependently Typed Haskell</h2>
+
+<p>At this year’s POPL, <a href="http://www.cis.upenn.edu/~sweirich">Stephanie Weirich</a> gave a keynote about <a href="http://www.cis.upenn.edu/~sweirich/talks/popl17.pdf"><em>The Influence of Dependent Types</em></a> on the Haskell type system. After a brief introduction, her fifth slide gave motivation for dependently  typed Haskell: <em>domain-specific type checkers</em>.</p>
+
+<p><img src="./type-tailoring_files/why-dependent-haskell.png" alt="Why Dependent Haskell? Domain-specific type checkers" border="4" style="width: 40%"></p>
+
+<p>The rest of the talk was a code walk of a  <a href="https://github.com/sweirich/dth/tree/master/popl17">dependently typed regular expression matcher</a>! Stephanie’s regular expression syntax supports Python-style named capture groups, and a successful match returns a record with group names as keys. These keys are reflected in the return type. Of course the point of the talk was not regular expressions, but rather  how some impressive GHC plugins compose to solve a practical problem.</p>
+
+<p>What I want to point out, however, is that if the goal is “domain-specific  type checkers”, type tailoring is a more direct solution. So if you are a programmer using Haskell or OCaml or Racket or Scala or  Clojure or Java or any other language with a decent syntax extension system,  you don’t need to wait for “dependently typed <code>X</code>” to add more static checking  to your library. Write a macro!</p>
+
+<h2 id="more-type-tailoring">More Type Tailoring</h2>
+
+<p>There is a full implementation of type-tailored <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code> on the  <a href="https://pkgd.racket-lang.org/">Racket package server</a>. Try it out by installing the <a href="https://pkgd.racket-lang.org/pkgn/package/trivial">trivial-pkg</a> package:</p>
+
+<div class="brush: bash">
+ <div class="pygments">
+  <pre><span></span>    $ raco pkg install trivial
+</pre></div>
+
+</div>
+
+<br>
+
+<p>The package also includes tailorings for:</p>
+
+<ul>
+ <li><a href="http://docs.racket-lang.org/trivial/index.html#%28part._.Format_.Strings%29">format strings</a></li>
+ <li>fixed-length <a href="http://docs.racket-lang.org/trivial/index.html#%28part._.List_.Operations%29">lists</a> and <a href="http://docs.racket-lang.org/trivial/index.html#%28part._.Vector_.Operations%29">vectors</a></li>
+ <li><a href="http://docs.racket-lang.org/trivial/index.html#%28part._.Functions%29"><em>N</em>-ary functions</a></li>
+ <li><a href="http://docs.racket-lang.org/trivial/index.html#%28part._.Integer_.Arithmetic%29">constant-folding arithmetic</a></li></ul>
+
+<p>as well as syntax for defining new tailorings.</p>
+
+<p>For further reading on type tailoring, and a sketch of how to prove the  soundness of a tailoring, we have a draft paper:</p>
+
+<ul>
+ <li><a href="http://www.ccs.neu.edu/home/types/resources/type-tailoring.pdf"><code>http://www.ccs.neu.edu/home/types/resources/type-tailoring.pdf</code></a></li></ul>
+
+<p>The draft also reports on a small evaluation of our tailored  <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code> on existing code. We searched the Racket distribution and libraries for uses of <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>  and found over 300 in untyped code. We then converted these uses to Typed Racket. After converting, most uses did not compile using Typed Racket’s <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>,  but swapping in the tailored <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code> (a 1-line change) removed  the type errors in over 250 cases.</p>
+
+<h3 id="appendix-brush-racketcount-groups">Appendix: <code>count-groups</code></h3>
+
+<p>Here is a simple implementation for <code>count-groups</code>. <a href="http://docs.racket-lang.org/trivial/index.html#%28part._.Integer_.Arithmetic%29">This file</a> contains a more robust implementation (look for <code>parse-groups</code>).</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define-for-syntax))" style="color: inherit">define-for-syntax</a></span> <span class="p">(</span><span class="n">count-groups</span> <span class="n">str</span><span class="p">)</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a></span> <span class="n">last-open-paren</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/boxes.html#(def._((quote._~23~25kernel)._box))" style="color: inherit">box</a></span> <span class="no">#f</span><span class="p">))</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a></span> <span class="n">num-groups</span>
+    <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/fold))" style="color: inherit">for/fold</a></span> <span class="p">([</span><span class="n">num-groups</span> <span class="mi">0</span><span class="p">])</span>
+              <span class="p">([</span><span class="n">c</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/sequences.html#(def._((lib._racket/private/base..rkt)._in-string))" style="color: inherit">in-string</a></span> <span class="n">str</span><span class="p">)]</span>
+               <span class="p">[</span><span class="n">i</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/sequences.html#(def._((lib._racket/private/base..rkt)._in-naturals))" style="color: inherit">in-naturals</a></span><span class="p">)])</span>
+      <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/case.html#(form._((lib._racket/private/more-scheme..rkt)._case))" style="color: inherit">case</a></span> <span class="n">c</span>
+       <span class="p">[(</span><span class="sc">#\(</span><span class="p">)</span>
+        <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/boxes.html#(def._((quote._~23~25kernel)._set-box!))" style="color: inherit">set-box!</a></span> <span class="n">last-open-paren</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">num-groups</span><span class="p">]</span>
+       <span class="p">[(</span><span class="sc">#\)</span><span class="p">)</span>
+        <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/boxes.html#(def._((quote._~23~25kernel)._unbox))" style="color: inherit">unbox</a></span> <span class="n">last-open-paren</span><span class="p">)</span>
+          <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/begin.html#(form._((quote._~23~25kernel)._begin))" style="color: inherit">begin</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/boxes.html#(def._((quote._~23~25kernel)._set-box!))" style="color: inherit">set-box!</a></span> <span class="n">last-open-paren</span> <span class="no">#f</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._+))" style="color: inherit">+</a></span> <span class="mi">1</span> <span class="n">num-groups</span><span class="p">))</span>
+          <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/exns.html#(def._((quote._~23~25kernel)._error))" style="color: inherit">error</a></span> <span class="o">'</span><span class="ss">smart-match</span> <span class="s2">"unmatched ')' at position <a href="http://docs.racket-lang.org/reference/strings.html#(def._((lib._racket/format..rkt)._~7ea))" style="color: inherit">~a</a> in '~a'"</span> <span class="n">i</span> <span class="n">str</span><span class="p">))]</span>
+       <span class="p">[</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._else))" style="color: inherit">else</a></span>
+        <span class="n">num-groups</span><span class="p">])))</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/boxes.html#(def._((quote._~23~25kernel)._unbox))" style="color: inherit">unbox</a></span> <span class="n">last-open-paren</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/exns.html#(def._((quote._~23~25kernel)._error))" style="color: inherit">error</a></span> <span class="o">'</span><span class="ss">smart-match</span> <span class="s2">"unmatched '(' at position <a href="http://docs.racket-lang.org/reference/strings.html#(def._((lib._racket/format..rkt)._~7ea))" style="color: inherit">~a</a> in '~a'"</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/boxes.html#(def._((quote._~23~25kernel)._unbox))" style="color: inherit">unbox</a></span> <span class="n">last-open-paren</span><span class="p">)</span> <span class="n">str</span><span class="p">)</span>
+    <span class="n">num-groups</span><span class="p">))</span>
+</pre></div>
+
+</div>
+
+<br>
+<col-2>
+
+</col-2></col-2></row>
+
+<footer>
+<row>
+<col-1>
+</col-1>
+<col-2>
+<h2><span class="label">next</span>&nbsp;<a class="next" href="http://blog.racket-lang.org/2017/04/racket-v6-9.html">Racket v6.9</a></h2>
+
+<h2><span class="label">prev</span>&nbsp;<a class="previous" href="http://blog.racket-lang.org/2017/03/languages-as-dotfiles.html">Languages as Dotfiles</a></h2>
+
+</col-2>
+</row>
+</footer>
+
+</article>
+
+<row class="one-column" id="bottom"><col-1></col-1><col-2>
+<p>Made with <a href="https://github.com/greghendershott/frog">Frog</a>, a static-blog generator written in Racket.
+<br><a href="https://github.com/racket/racket-lang-org">Source code</a> for this blog.
+  
+</p></col-2></row></body></html>

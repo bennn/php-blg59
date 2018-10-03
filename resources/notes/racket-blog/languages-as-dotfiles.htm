@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<!-- saved from url=(0062)http://blog.racket-lang.org/2017/03/languages-as-dotfiles.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    
+    <title>Languages as Dotfiles</title>
+    <meta name="description" content="_posted by Leif Andersen and Ben Greenman_  Tired of writing `(require (for-syntax syntax/parse))` at the top of your Racket programs? This post shows how to make a `#lang` to customize your default programming environment....">
+    <meta name="author" content="The Unknown Author">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="http://blog.racket-lang.org/favicon.ico">
+    <link rel="canonical" href="http://blog.racket-lang.org/2017/03/languages-as-dotfiles.html">
+    <link rel="next" href="http://blog.racket-lang.org/2017/02/on-application.html">
+    <link rel="prev" href="http://blog.racket-lang.org/2017/04/type-tailoring.html">
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="./src/main.css">
+    <link rel="stylesheet" type="text/css" href="./src/blog-fonts.css">
+    <!-- Feeds -->
+    <link rel="alternate" type="application/atom+xml" href="http://blog.racket-lang.org/feeds/all.atom.xml" title="Atom Feed">
+    <link rel="alternate" type="application/rss+xml" href="http://blog.racket-lang.org/feeds/all.rss.xml" title="RSS Feed">
+    <!-- JS -->
+    </head>
+  <body>
+<row class="one-column" id="logo"><col-1><a href="http://racket-lang.org/"><div id="logo-container"><img id="logo" src="./src/racket-logo.svg"> Racket</div></a></col-1><col-2><p><a href="http://blog.racket-lang.org/index.html">blog</a></p></col-2></row>
+<article>
+<row>
+
+<col-1>
+  <p class="date-and-tags">03 Mar 2017</p>
+
+</col-1>
+
+<col-2>
+  <header>
+  <h1>Languages as Dotfiles</h1>
+  </header>
+
+<p><em>posted by Leif Andersen and Ben Greenman</em></p>
+
+<p>Tired of writing <code>(require (for-syntax syntax/parse))</code> at the top of your Racket programs? This post shows how to make a <code>#lang</code> to customize your default programming environment.</p>
+<!-- more-->
+
+<p>Let’s build a language <code>#lang scratch</code> that:</p>
+
+<ul>
+ <li>
+  <p>loads the <a href="http://docs.racket-lang.org/reference/index.html"><code>racket/base</code></a>,  <a href="http://docs.racket-lang.org/reference/strings.html#%28mod-path._racket%2Fformat%29"><code>racket/format</code></a>,  <a href="http://docs.racket-lang.org/reference/pairs.html#%28mod-path._racket%2Flist%29"><code>racket/list</code></a>, and  <a href="http://docs.racket-lang.org/syntax/stxparse.html"><code>syntax/parse</code></a>  (at <a href="http://docs.racket-lang.org/guide/phases.html">phase 1</a>)  libraries; and</p></li>
+ <li>
+  <p>enables Scribble’s <a href="http://docs.racket-lang.org/scribble/reader.html">@-syntax</a>.</p></li></ul>
+
+<p>We’ll follow a three-step recipe:</p>
+
+<ol>
+ <li>
+  <p>build an empty <code>scratch</code> library,</p></li>
+ <li>
+  <p>load the libraries, and</p></li>
+ <li>
+  <p>change the reader.</p></li></ol>
+
+<p>At the end, we’ll see how to make <code>scratch</code> your default language in DrRacket.</p>
+
+<h2 id="getting-started">Getting Started</h2>
+
+<p>First we need to make a <code>scratch/</code> directory with <code>info.rkt</code> and <code>main.rkt</code> files:</p>
+
+<div class="brush: bash">
+ <div class="pygments">
+  <pre><span></span>$ mkdir scratch<span class="p">;</span> <span class="nb">cd</span> scratch
+$ touch info.rkt
+$ touch main.rkt
+</pre></div>
+
+</div>
+
+<p>Inside the <code>info.rkt</code> file, write:</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span><span class="kn">#lang </span><span class="nn">info</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a></span> <span class="n">name</span> <span class="s2">"scratch"</span><span class="p">)</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a></span> <span class="n">deps</span> <span class="o">'</span><span class="p">(</span><span class="s2">"base"</span><span class="p">))</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a></span> <span class="nb"><a href="http://docs.racket-lang.org/reference/runtime.html#(def._((quote._~23~25kernel)._version))" style="color: inherit">version</a></span> <span class="s2">"0.0"</span><span class="p">)</span>
+</pre></div>
+
+</div>
+
+<p>Inside the <code>main.rkt</code> file, write:</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span><span class="kn">#lang </span><span class="nn">racket/base</span>
+</pre></div>
+
+</div>
+
+<p>Now from inside the <code>scratch/</code> directory, install the package:</p>
+
+<div class="brush: bash">
+ <div class="pygments">
+  <pre><span></span>$ raco pkg install
+</pre></div>
+
+</div>
+
+<p>You are now the proud parent of a new Racket package.</p>
+
+<blockquote>
+ <p><a href="http://docs.racket-lang.org/pkg/cmdline.html#%28part._raco-pkg-new%29">raco-pkg-new</a> is a shortcut for starting a new package.</p></blockquote>
+
+<blockquote>
+ <p>For more information on the <code>info.rkt</code> file format, see the <a href="http://docs.racket-lang.org/raco/info_rkt.html"><code>raco</code></a> documentation.</p></blockquote>
+
+<h2 id="combining-libraries">Combining Libraries</h2>
+
+<p>Any program can now <code>(require scratch)</code> to import all bindings provided by the <code>main.rkt</code> file. Our next step is to reprovide bindings from other libraries in <code>main.rkt</code>.</p>
+
+<p>Since we want to use <code>scratch</code> as a language, we also need to specify how to <a href="http://docs.racket-lang.org/reference/Reading.html#%28def._%28%28quote._~23~25kernel%29._read%29%29">read</a> a <code>scratch</code> program. The <a href="http://docs.racket-lang.org/syntax/reader-helpers.html#%28mod-path._syntax%2Fmodule-reader%29"><code>syntax/module-reader</code></a> language provides a shorthand for doing so.</p>
+
+<p>Here is the updated <code>main.rkt</code> file:</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span><span class="kn">#lang </span><span class="nn">racket/base</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._require))" style="color: inherit">require</a></span> <span class="n">racket/format</span> <span class="n">racket/list</span>
+         <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._for-syntax))" style="color: inherit">for-syntax</a></span> <span class="n">racket/base</span> <span class="n">syntax/parse</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._provide))" style="color: inherit">provide</a></span> <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._all-from-out))" style="color: inherit">all-from-out</a></span> <span class="n">racket/base</span> <span class="n">racket/format</span> <span class="n">racket/list</span><span class="p">)</span>
+         <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._for-syntax))" style="color: inherit">for-syntax</a></span> <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._all-from-out))" style="color: inherit">all-from-out</a></span> <span class="n">racket/base</span> <span class="n">syntax/parse</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/module.html#(form._((quote._~23~25kernel)._module*))" style="color: inherit">module*</a></span> <span class="n">reader</span> <span class="n">syntax/module-reader</span>
+  <span class="n">scratch</span><span class="p">)</span>
+</pre></div>
+
+</div>
+
+<p>The <code><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._provide))" style="color: inherit">provide</a></code> form declares the exports of the <code>scratch</code> module. In other words, if another module contains the form <code>(require scratch)</code> then that module will import bindings from <code>racket/base</code>, <code>racket/format</code>, <code>racket/list</code>, and <code>syntax/parse</code>.</p>
+
+<p>The <code>reader</code> submodule is written in the <code>syntax/module-reader</code> language. This submodule imports all bindings from its enclosing module (<code>scratch</code>, or to be slightly more precise “the toplevel module in the file <code>scratch/main.rkt</code>”) and defines a language that provides those bindings and uses the reader from <code>racket/base</code>.</p>
+
+<p>In short, this code does what we want.</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span><span class="kn">#lang </span><span class="nn">scratch</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define-syntax))" style="color: inherit">define-syntax</a></span> <span class="p">(</span><span class="n">did-it-work?</span> <span class="n">stx</span><span class="p">)</span>
+  <span class="p">(</span><span class="n"><a href="http://docs.racket-lang.org/syntax/Parsing_Syntax.html#(form._((lib._syntax/parse..rkt)._syntax-parse))" style="color: inherit">syntax-parse</a></span> <span class="n">stx</span>
+    <span class="p">[</span><span class="k"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt).__))" style="color: inherit">_</a></span> <span class="o">#'</span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((lib._racket/list..rkt)._first))" style="color: inherit">first</a></span> <span class="o">'</span><span class="p">(</span><span class="ss">yes</span> <span class="ss">it</span> <span class="ss">did</span><span class="p">))]))</span>
+
+<span class="p">(</span><span class="n">did-it-work?</span><span class="p">)</span>
+</pre></div>
+
+</div>
+
+<p>Yes it does.</p>
+
+<blockquote>
+ <p>Annoyed that the <code><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._require))" style="color: inherit">require</a></code> and <code><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._provide))" style="color: inherit">provide</a></code> forms are so similar? <a href="http://docs.racket-lang.org/reprovide/index.html">There’s a library for that</a>.</p></blockquote>
+
+<h2 id="changing-the-reader">Changing the Reader</h2>
+
+<p>Next, we want to enable the <a href="http://docs.racket-lang.org/scribble/reader-internals.html#%28mod-path._scribble%2Freader%29">@-expression</a> reader. This involves rexporting the scribble <code><a href="http://docs.racket-lang.org/reference/Reading.html#(def._((quote._~23~25kernel)._read))" style="color: inherit">read</a></code> and <code><a href="http://docs.racket-lang.org/reference/Reading.html#(def._((quote._~23~25kernel)._read-syntax))" style="color: inherit">read-syntax</a></code> functions in the <code>reader</code> submodule in <code>main.rkt</code>:</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span><span class="kn">#lang </span><span class="nn">racket/base</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._require))" style="color: inherit">require</a></span> <span class="n">racket/list</span>
+         <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._for-syntax))" style="color: inherit">for-syntax</a></span> <span class="n">racket/base</span> <span class="n">syntax/parse</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._provide))" style="color: inherit">provide</a></span> <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._all-from-out))" style="color: inherit">all-from-out</a></span> <span class="n">racket/list</span> <span class="n">racket/base</span><span class="p">)</span>
+         <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._for-syntax))" style="color: inherit">for-syntax</a></span> <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._all-from-out))" style="color: inherit">all-from-out</a></span> <span class="n">racket/base</span> <span class="n">syntax/parse</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/module.html#(form._((quote._~23~25kernel)._module*))" style="color: inherit">module*</a></span> <span class="n">reader</span> <span class="n">syntax/module-reader</span>
+  <span class="n">scratch</span>
+  <span class="kd">#:read</span> <span class="n">s:read</span>
+  <span class="kd">#:read-syntax</span> <span class="n">s:read-syntax</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._require))" style="color: inherit">require</a></span> <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._prefix-in))" style="color: inherit">prefix-in</a></span> <span class="n">s:</span> <span class="n">scribble/reader</span><span class="p">)))</span>
+</pre></div>
+
+</div>
+
+<p>To test that it works, let’s embed some C syntax in our Racket program:</p>
+
+<div class="brush: racket">
+ <div class="pygments">
+  <pre><span></span><span class="kn">#lang </span><span class="nn">scratch</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define-syntax))" style="color: inherit">define-syntax</a></span> <span class="p">(</span><span class="n">did-it-work?</span> <span class="n">stx</span><span class="p">)</span>
+  <span class="p">(</span><span class="n"><a href="http://docs.racket-lang.org/syntax/Parsing_Syntax.html#(form._((lib._syntax/parse..rkt)._syntax-parse))" style="color: inherit">syntax-parse</a></span> <span class="n">stx</span>
+    <span class="p">[</span><span class="k"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt).__))" style="color: inherit">_</a></span> <span class="o">#'</span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((lib._racket/list..rkt)._first))" style="color: inherit">first</a></span> <span class="o">'</span><span class="p">(</span><span class="ss">yes</span> <span class="ss">it</span> <span class="ss">did</span><span class="p">))]))</span>
+
+<span class="p">(</span><span class="n">did-it-work?</span><span class="p">)</span>
+
+<span class="n">@~a</span><span class="p">{</span>
+ <span class="n">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+   <span class="n">return</span> <span class="mi">0</span><span class="c1">;</span>
+ <span class="p">}}</span>
+</pre></div>
+
+</div>
+
+<blockquote>
+ <p>At this point, running <code class="brush: bash">$ raco setup --check-pkg-deps scratch</code> will report an undeclared dependency on <a href="http://docs.racket-lang.org/scribble/reader-internals.html#%28mod-path._at-exp%29"><code>at-exp-lib</code></a>. Make sure to add <code>at-exp-lib</code> to the <code>deps</code> list in your <code>info.rkt</code> file, or run <code class="brush: bash">$ raco setup --fix-pkg-deps scratch</code></p></blockquote>
+
+<blockquote>
+ <p>Using <a href="http://docs.racket-lang.org/reference/require.html#%28form._%28%28lib._racket%2Fprivate%2Fbase..rkt%29._prefix-in%29%29"><code></code></a><code><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._prefix-in))" style="color: inherit">prefix-in</a></code> is not necessary; it just clarifies where <code><a href="http://docs.racket-lang.org/reference/Reading.html#(def._((quote._~23~25kernel)._read))" style="color: inherit">read</a></code> and <code><a href="http://docs.racket-lang.org/reference/Reading.html#(def._((quote._~23~25kernel)._read-syntax))" style="color: inherit">read-syntax</a></code> come from.</p></blockquote>
+
+<blockquote>
+ <p>If you think inline C <em>strings</em> are interesting, you should definitely watch Jay McCarthy’s RacketCon 2016 <a href="https://www.youtube.com/watch?v=r1kE3R26dK0">talk</a> on <a href="https://github.com/jeapostrophe/remix">remix</a>.</p></blockquote>
+
+<h2 id="drrackets-automatic-brush-racketlang-line">DrRacket’s Automatic <code>#lang</code> Line</h2>
+
+<p>To make <code>scratch</code> the default language for new files in DrRacket:</p>
+
+<ol>
+ <li>
+  <p>Click “Language” in the menu bar.</p></li>
+ <li>
+  <p>Click “Choose Language” in the drop-down menu.</p></li>
+ <li>
+  <p>Click the radio button for “The Racket Language”, then click the “Show Details” button at the bottom of the window.</p></li>
+ <li>
+  <p>Type <code>#lang scratch</code> in the text box labeled “Automatic <code>#lang</code> line”.</p></li></ol>
+
+<p>Click “Ok”, and that’s the end. Enjoy.</p>
+
+<h2 id="the-end">The End</h2>
+
+<p>You can and should engineer the <code>#lang</code> line of your Racket programs to remove unnecessary boilerplate and/or enforce a project-specific development environment.</p>
+
+<p>Notes:</p>
+
+<ul>
+ <li>
+  <p>Feel free to pubish your custom language on the Racket  <a href="https://pkgn.racket-lang.org/">package server</a>.  (Make sure to run <code class="brush: bash">$ raco setup --check-pkg-deps scratch</code> beforehand.)</p></li>
+ <li>
+  <p>Our personal “dotfiles” are  <a href="https://github.com/LeifAndersen/racket-scratch">racket-scratch</a>  and <a href="https://github.com/bennn/agile">agile</a>.</p></li>
+ <li>
+  <p>The title “Languages as Dotfiles” is a reference to  <a href="http://blog.racket-lang.org/2011/03/languages-as-libraries-pldi-2011.html">Languages as Libraries</a></p></li></ul>
+<col-2>
+
+</col-2></col-2></row>
+
+<footer>
+<row>
+<col-1>
+</col-1>
+<col-2>
+<h2><span class="label">next</span>&nbsp;<a class="next" href="http://blog.racket-lang.org/2017/04/type-tailoring.html">Type Tailoring</a></h2>
+
+<h2><span class="label">prev</span>&nbsp;<a class="previous" href="http://blog.racket-lang.org/2017/02/on-application.html">On Application</a></h2>
+
+</col-2>
+</row>
+</footer>
+
+</article>
+
+<row class="one-column" id="bottom"><col-1></col-1><col-2>
+<p>Made with <a href="https://github.com/greghendershott/frog">Frog</a>, a static-blog generator written in Racket.
+<br><a href="https://github.com/racket/racket-lang-org">Source code</a> for this blog.
+  
+</p></col-2></row></body></html>

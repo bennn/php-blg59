@@ -1,3 +1,5 @@
+<!-- TODO local copies for PRL and racket blog posts -->
+
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -28,6 +30,16 @@
       <div class="classyspace"> </div>
 
       <div class="publication">
+        <h3 class="pubtitle"><a class="publink" href="http://prl.ccs.neu.edu/blog/2018/05/08/sampling-gradual-typing-performance/">Sampling Gradual Typing Performance</a> (May 2018)</h3>
+        <p class="pubauthors">
+          This post explains the sampling method introduced in the paper <i>On the Cost of Type-Tag Soundness</i>.
+          <a class="colorlink" href="./prl-blog/sampling-gradual-typing-performance.htm">[src]</a>
+        </p>
+      </div>
+
+      <div class="classyspace"> </div>
+
+      <div class="publication">
         <h3 class="pubtitle"><a class="publink" href="./racketeering101/racketeering101.pdf">Racketeering 101</a> (October 2017)</h3>
         <p class="pubauthors">
           Slides from a <a href="http://con.racket-lang.org/2017" class="colorlink">RacketCon 2017</a> tutorial on submitting a pull request to a package in the Racket <a href="https://pkgd.racket-lang.org/pkgn/search?q=main-distribution+" class="colorlink">main distribution</a>.
@@ -36,6 +48,32 @@
           </p><p class="pubauthors">
 
           See <a href="http://blog.racket-lang.org/2017/09/tutorial-contributing-to-racket.html" class="colorlink"><tt>http://blog.racket-lang.org/</tt></a> for a companion blog post.
+          <a class="colorlink" href="./racket-blog/tutorial-contributing-to-racket.htm">[src]</a>
+        </p>
+      </div>
+
+      <div class="classyspace"> </div>
+
+      <div class="publication">
+        <h3 class="pubtitle"><a class="publink" href="http://blog.racket-lang.org/2017/04/type-tailoring.html">Type Tailoring</a> (April 2017)</h3>
+        <p class="pubauthors">
+          Type tailoring is a technique for adding domain-specific type
+          checkers to a typed host language. Using the <i>Type Systems as Macros</i>
+          approach to building typed languages, implementing type tailoring in
+          Typed Racket is straightforward. Any library can apply the core idea,
+          and you can try programming with type tailorings by downloading the
+          <tt>trivial</tt> package (requires Racket v6.4 or later).
+          <a class="colorlink" href="./racket-blog/type-tailoring.htm">[src]</a>
+        </p>
+      </div>
+
+      <div class="classyspace"> </div>
+
+      <div class="publication">
+        <h3 class="pubtitle"><a class="publink" href="http://prl.ccs.neu.edu/blog/2017/05/23/building-a-website-with-scribble/">Building a Website with Scribble</a> (May 2017)</h3>
+        <p class="pubauthors">
+          The source code for the PRL website is written using Scribble, the Racket documentation tool. I am very happy with this choice, and you should be too!
+          <a class="colorlink" href="./prl-blog/building-a-website-with-scribble.htm">[src]</a>
         </p>
       </div>
 
@@ -50,6 +88,18 @@
           </p><p class="pubauthors">
           These and other notes from HOPL 2017 are in the shared repo for the course:
             <a href="https://github.com/nuprl/hopl-s2017" class="colorlink"><tt>https://github.com/nuprl/hopl-s2017</tt></a>
+        </p>
+      </div>
+
+      <div class="classyspace"> </div>
+
+      <div class="publication">
+        <h3 class="pubtitle"><a class="publink" href="http://blog.racket-lang.org/2017/03/languages-as-dotfiles.html">Languages as Dotfiles</a> (March 2017)</h3>
+        <p class="pubauthors">
+          Tired of writing <tt>(require (for-syntax syntax/parse))</tt> at the
+          top of your Racket programs? This post shows how to make a #lang to
+          customize your default programming environment.
+          <a class="colorlink" href="./racket-blog/languages-as-dotfiles.htm">[src]</a>
         </p>
       </div>
 
@@ -86,6 +136,26 @@
         <p class="pubauthors">
           An overview of the IFDS framework for modeling and solving problems in static analysis, following the <a href="https://research.cs.wisc.edu/wpis/papers/popl95.pdf" class="colorlink">POPL 1994 paper</a>.
           Presented in Frank Tip's <a href="https://docs.google.com/document/d/1JeYoC-dmCxLgYuQcv5tU1rfez6IRf_OKO4ipeRtQd7o">CS7480</a>.
+        </p>
+      </div>
+
+      <div class="classyspace"> </div>
+
+      <div class="publication">
+        <h3 class="pubtitle"><a class="publink" href="http://prl.ccs.neu.edu/blog/2016/08/03/a-few-cores-too-many/">A Few Cores too Many</a> (August 2016)</h3>
+        <p class="pubauthors">
+          Performance matters for software systems, but performance is not always easy to measure. At the PRL we recently had a scare with some unreliable measurements. Here is the story.
+          <a class="colorlink" href="./prl-blog/a-few-cores-too-many.htm">[src]</a>
+        </p>
+      </div>
+
+      <div class="classyspace"> </div>
+
+      <div class="publication">
+        <h3 class="pubtitle"><a class="publink" href="http://prl.ccs.neu.edu/blog/2016/08/02/tutorial-zero-to-sixty-in-racket/">Tutorial: Zero to Sixty in Racket</a> (August 2016)</h3>
+        <p class="pubauthors">
+          Racket is excellent for incrementally growing scripts into full-fledged programs. This post steps through the evolution of one small program and highlights the Racket tools that enable incremental advances.
+          <a class="colorlink" href="./prl-blog/tutorial-zero-to-sixty-in-racket.htm">[src]</a>
         </p>
       </div>
 
@@ -157,7 +227,10 @@
       <div class="publication">
         <h3 class="pubtitle"><a class="publink" href="./math-explorers/calendar_computations.pdf">Calendar Computations</a> (January 2012)</h3>
         <p class="pubauthors">
-          Revision and extension of a <a class="colorlink" href="http://pi.math.cornell.edu/~mec/Winter2009/Blanco/calendar.html">calendar computations module</a> from the Cornell <a href="https://math.cornell.edu/mec" class="colorlink">Math Explorer's Club</a>. <a class="colorlink" href="./math-explorers/calendar_computations.pdf">[TeX]</a>
+          <a class="colorlink" href="./math-explorers/calendar_computations.pdf">[TeX]</a>
+        </p>
+        <p class="pubauthors">
+          Revision and extension of a <a class="colorlink" href="http://pi.math.cornell.edu/~mec/Winter2009/Blanco/calendar.html">calendar computations module</a> from the Cornell <a href="https://math.cornell.edu/mec" class="colorlink">Math Explorer's Club</a>.
         </p>
       </div>
 

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!-- saved from url=(0060)http://prl.ccs.neu.edu/blog/2016/08/03/a-few-cores-too-many/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    
+    <title>A few cores too many</title>
+    <meta name="description" content="Performance matters for software systems, but performance is not always easy  to measure. At the PRL we recently had a scare with some unreliable measurements. Here is the story....">
+    <meta name="author" content="PRL">
+    <meta name="keywords" content="performance, benchmarking, lost time, by Ben Greenman">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="http://prl.ccs.neu.edu/img/favicon.ico">
+    <link rel="canonical" href="http://prl.ccs.neu.edu/blog/2016/08/03/a-few-cores-too-many/">
+    <link rel="next" href="http://prl.ccs.neu.edu/blog/2016/08/02/tutorial-zero-to-sixty-in-racket/">
+    <link rel="prev" href="http://prl.ccs.neu.edu/blog/2016/09/15/nepls-on-october-7th-at-northeastern-university/">
+    <script src="./src/cb=gapi.loaded_1" async=""></script><script src="./src/cb=gapi.loaded_0" async=""></script><script id="twitter-wjs" src="./src/widgets.js"></script><script type="text/javascript" async="" src="./src/MathJax.js">
+    </script>
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="./src/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="./src/pygments.css">
+    <link rel="stylesheet" type="text/css" href="./src/custom.css">
+    <link rel="stylesheet" type="text/css" href="./src/racket.css">
+    <link rel="stylesheet" type="text/css" href="./src/scribble.css">
+    <!-- Feeds -->
+    <link rel="alternate" type="application/atom+xml" href="http://prl.ccs.neu.edu/blog/feeds/all.atom.xml" title="Atom Feed">
+    <link rel="alternate" type="application/rss+xml" href="http://prl.ccs.neu.edu/blog/feeds/all.rss.xml" title="RSS Feed">
+  <script type="text/javascript" charset="utf-8" async="" src="./src/button.3ebb4253c7cb2cc3c9eaac42044fc82c.js"></script><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 5px 0px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; -khtml-border-radius: 5px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 1px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: .7em}
+.MathJax_MenuRadioCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuLabel {padding: 1px 2em 3px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #DDDDDD; margin: 4px 3px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: #606872; color: white}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover, .MJXp-munder {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > *, .MJXp-munder > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style></head>
+  <body id="pn-top" class="subpages"><div id="MathJax_Message" style="display: none;"></div>
+    <nav class="navbar navbar-inverse">
+      <div class="container">
+        <div class="row">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li role="presentation"><a href="http://prl.ccs.neu.edu/">Home</a></li>
+              <li role="presentation"><a href="http://prl.ccs.neu.edu/people.html">People</a></li>
+              <li role="presentation"><a href="http://prl.ccs.neu.edu/teaching.html">Teaching</a></li>
+              <li role="presentation"><a href="http://prl.ccs.neu.edu/seminars.html">Seminars</a></li>
+              <li role="presentation"><a href="http://prl.ccs.neu.edu/software.html">Software</a></li>
+              <li role="presentation"><a href="http://prl.ccs.neu.edu/publications.html">Publications</a></li>
+              <li role="presentation"><a href="http://prl.ccs.neu.edu/new-members.html">New Members</a></li>
+              <li role="presentation"><a href="http://prl.ccs.neu.edu/contact.html">Contact</a></li>
+              <li role="presentation" class="active"><a href="http://prl.ccs.neu.edu/blog/index.html">Blog</a></li>
+            </ul>
+          </div><!--/.navbar-collapse -->
+        </div>
+      </div>
+    </nav>
+    <div class="jumbotron subpages">
+      <div class="container">
+        <div class="row">
+          <a style="text-decoration:none; color:white" href="http://prl.ccs.neu.edu/blog/index.html">
+            <div class="col-md-12">
+              <h1>Inside PRL</h1>
+              <p>Reading between the parentheses</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="pn-main-wrapper">
+      <div class="content">
+        <div class="container">
+          <div class="row">
+
+            <!-- Main column -->
+            <div id="content" class="col-md-12">
+
+
+
+              <article>
+  <header>
+    <h1>A few cores too many</h1>
+    <p class="date-and-tags">
+<time datetime="2016-08-03" pubdate="true">2016-08-03</time> :: <span class="tags"><a href="http://prl.ccs.neu.edu/blog/tags/performance.html">performance</a>, <a href="http://prl.ccs.neu.edu/blog/tags/benchmarking.html">benchmarking</a>, <a href="http://prl.ccs.neu.edu/blog/tags/lost-time.html">lost time</a>, <a href="http://prl.ccs.neu.edu/blog/tags/by-Ben-Greenman.html">by Ben Greenman</a></span></p>
+  </header>
+
+<p>Performance matters for software systems, but performance is not always easy  to measure. At the PRL we recently had a scare with some unreliable measurements. Here is the story.</p>
+<!-- more-->
+
+<p>Last year, we proposed a method for evaluating the performance of gradual type  systems based on measuring <em>every possible configuration</em> of typed and untyped  code that a programmer might explore <a href="http://www.ccs.neu.edu/racket/pubs/popl16-tfgnvf.pdf">(pdf)</a>. Given the freedom that gradual typing offers, this is the only realistic way to measure  the performance of a gradual type system.</p>
+
+<p>But it is a lot to measure! While developing the method, we spent over 3 months benchmarking a total of 75,844 configurations. Each configuration is a complete program and some gradual typings caused  some programs to slow by 50x or even 100x, so many of these configurations took  minutes to run.</p>
+
+<p>The next question we asked was naturally “how can we scale this method to large software projects?” In <a href="http://docs.racket-lang.org/ts-reference/Libraries_Provided_With_Typed_Racket.html#%28part._.Porting_.Untyped_.Modules_to_.Typed_.Racket%29">our case</a>,  the number of gradually typed configurations scaled exponentially with the number of modules. Current gradual type system for <a href="https://github.com/mvitousek/reticulated">Python</a>  and <a href="http://www.di.ens.fr/~zappa/readings/ecoop15.pdf">JavaScript</a>  are exponential in the number of <em>variables</em> in the program.</p>
+
+<p>We explored two solutions:</p>
+
+<ol>
+ <li>Max New began work on a prediction model (inspired by work  on <a href="http://subs.emis.de/LNI/Proceedings/Proceedings213/185.pdf">software product lines</a>)  to estimate the performance of <code>2^N</code> configurations after polynomially-many measurements.</li>
+ <li>Asumu Takikawa and I shopped for a multi-core computer.</li></ol>
+
+<p>By Thanksgiving, we had bought a Linux machine with 2 <a href="http://www.amd.com/en-us/products/server/opteron/6000/6300">AMD Opteron 6376 2.3GHz</a>  processors (16 cores each) and put it to work running benchmarks on 29 cores simultaneously. Life was good.</p>
+
+<p>Later that winter, Max implemented a prediction algorithm. The basic idea was to focus on <em>boundaries</em> between modules and isolate their  effect on performance. If two modules are untyped, their boundary will have zero cost. If the same two modules are typed, their boundary might result in an overall  performance improvement due to type-driven optimizations. And if one module is typed and the other untyped, their boundary will  suffer some cost of type checking at runtime. In general a program with <code>N</code> modules has at most <code>N(N - 1) / 2</code> internal boundaries,  so it is far more time-efficient to measure only the boundaries than to benchmark  <code>2^N</code> gradually typed configurations.</p>
+
+<p>Fast-forward to March, we had a prototype prediction algorithm and it was time to test. Again using 29 cores (because, why not), we gathered cost/benefit numbers for  one 4-module benchmark and used them to predict performance for its 16 configurations. The results were not very good.</p>
+
+<div class="figure"><img src="./src/a-few-cores-too-many-1.png" alt="Figure 1: True running time vs. predicted running time for 16 configurations">
+ <p class="caption">Figure 1: True running time vs. predicted running time for 16 configurations</p></div>
+
+<p>Those green circles are the ground truth, the average running time after 5 iterations of each config. The blue triangles are what we predicted. Except for configurations 0 and 8, the triangles are FAR off from the truth. Many are even negative … obviously the algorithm needs work.</p>
+
+<p>But then, out of frustration, desperation, or just good luck, Max compared the  predictions to ground truth data gathered on a <em>single</em> core, leaving the other 31  cores idle.</p>
+
+<div class="figure"><img src="./src/a-few-cores-too-many-2.png" alt="Figure 2: Predictions made using measurements from a single core">
+ <p class="caption">Figure 2: Predictions made using measurements from a single core</p></div>
+
+<p>First off, the red “sequential truth” dots are slightly closer to the predicted triangles. Second — and this is the scary part — the red dots are very different from  the green dots. <em>Running on 1 core vs. 29 cores should not change the measurements!</em></p>
+
+<p>From here we tried increasing the running time of the benchmark,  removing I/O and system calls,  checking for hyperthreading (ARM cores don’t support it),  and even changing the cores’ CPU governor. The hope was that results taken from 1 core could match results from <code>N</code> cores,  for some <code>N &gt; 1</code>. It turns out <code>N = 2</code> was stable, but even for <code>N = 3</code> we found graphs like the following:</p>
+
+<div class="figure"><img src="./src/a-few-cores-too-many-3.png" alt="Figure 3: exact running times. Same-colored dots in each column should be tightly clustered.">
+ <p class="caption">Figure 3: exact running times. Same-colored dots in each column should be tightly clustered.</p></div>
+
+<p>This data is for the same 16 configurations as the previous two graphs. Green dots are exact running times measured with 25 cores. Red dots are running times measured with 1 core. The red dots are much closer together, and always unimodal. The green dots are evidence that maybe the 32-core machine has, as Jan Vitek  put it, 30 cores too many.</p>
+
+<blockquote>
+ <p>“Oh my. You think it’ll never happen to you. Well, now I’ve learned my lesson.”</p><!-- bg: If anyone knows this quote I will be AMAZED. If anyone can even Google this quote, I'll buy them 2 beers and a pizza.--></blockquote>
+
+<p>And so, we said goodbye to the last 4 months of data and started over running at most two cores. The new results are all stable, but still we keep pinching ourselves.</p>
+
+<p>P.S. the results from <a href="http://www.ccs.neu.edu/racket/pubs/#popl16-tfgnvf">POPL 2016</a> are just fine,  as they were not taken on the new machine running more than 2 cores.  If you have time to confirm, that data is in our  <a href="http://www.ccs.neu.edu/home/asumu/artifacts/popl-2016/">artifact</a>  and in the <a href="https://github.com/nuprl/gradual-typing-performance/tree/master/paper/popl-2016/data">gradual-typing-performance</a> repo.</p>
+  <br><br>
+  <footer>
+    <script type="text/javascript">
+      !function(d,s,id){
+          var js,fjs=d.getElementsByTagName(s)[0];
+          if(!d.getElementById(id)){
+              js=d.createElement(s);
+              js.id=id;
+              js.src="//platform.twitter.com/widgets.js";
+              fjs.parentNode.insertBefore(js,fjs);
+          }
+      }(document,"script","twitter-wjs");
+    </script>
+    <iframe id="twitter-widget-1" scrolling="no" frameborder="0" allowtransparency="true" class="twitter-share-button twitter-share-button-rendered twitter-tweet-button" title="Twitter Tweet Button" src="./src/tweet_button.4ddf50b7ac5c5f06f6679f003b742641.en.html" style="position: static; visibility: visible; width: 61px; height: 20px;" data-url="http://prl.ccs.neu.edu/blog/2016/08/03/a-few-cores-too-many/"></iframe>
+    <script type="text/javascript" src="./src/plusone.js" gapi_processed="true"></script>
+    <div id="___plusone_0" style="text-indent: 0px; margin: 0px; padding: 0px; background: transparent; border-style: none; float: none; line-height: normal; font-size: 1px; vertical-align: baseline; display: inline-block; width: 32px; height: 20px;"><iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" style="position: static; top: 0px; width: 32px; margin: 0px; border-style: none; left: 0px; visibility: visible; height: 20px;" tabindex="0" vspace="0" width="100%" id="I0_1538529166061" name="I0_1538529166061" src="./src/fastbutton.html" data-gapiattached="true" title="G+"></iframe></div>
+    <ul class="pager">
+    <li class="previous">
+      <a href="http://prl.ccs.neu.edu/blog/2016/09/15/nepls-on-october-7th-at-northeastern-university/">← <em>NEPLS on October 7th at Northeastern University</em></a>
+    </li>
+    <li class="next">
+      <a href="http://prl.ccs.neu.edu/blog/2016/08/02/tutorial-zero-to-sixty-in-racket/"><em>Tutorial: Zero to Sixty in Racket</em> →</a>
+    </li>
+    </ul>
+  </footer>
+</article>
+            </div>
+          </div>
+        </div>
+        <footer class="footer">
+          <hr>
+          <p><iframe id="twitter-widget-0" scrolling="no" frameborder="0" allowtransparency="true" class="twitter-follow-button twitter-follow-button-rendered" title="Twitter Follow Button" src="./src/follow_button.4ddf50b7ac5c5f06f6679f003b742641.en.html" style="position: static; visibility: visible; width: 114px; height: 20px;" data-screen-name="neu_prl"></iframe>
+             <script type="text/javascript">
+               !function(d,s,id){
+                   var js,fjs=d.getElementsByTagName(s)[0];
+                   if(!d.getElementById(id)){
+                       js=d.createElement(s);
+                       js.id=id;
+                       js.src="//platform.twitter.com/widgets.js";
+                       fjs.parentNode.insertBefore(js,fjs);
+                   }
+               }(document,"script","twitter-wjs");
+             </script></p>
+          <p>Blog generated
+          by <a href="https://github.com/greghendershott/frog">Frog</a>,
+          using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
+          <p>© Copyright Programming Research Laboratory 2015-2016 | made by <a href="http://www.catchexception.cz/" target="_blank">Catchexception s.r.o.</a> | source on <a href="https://github.com/nuprl/website">GitHub</a></p>
+        </footer>
+      </div>
+    </div>
+    <!-- </body> JS -->
+    <script type="text/javascript" src="./src/jquery.min.js"></script>
+    <script type="text/javascript" src="./src/bootstrap.min.js"></script>
+    <script type="text/javascript" src="./src/custom.js"></script>
+    <script type="text/javascript" src="./src/analytics.js"></script>
+  
+<iframe scrolling="no" frameborder="0" allowtransparency="true" src="./src/widget_iframe.4ddf50b7ac5c5f06f6679f003b742641.html" title="Twitter settings iframe" style="display: none;"></iframe><iframe name="oauth2relay755628084" id="oauth2relay755628084" src="./src/postmessageRelay.html" tabindex="-1" aria-hidden="true" style="width: 1px; height: 1px; position: absolute; top: -100px;"></iframe><iframe id="rufous-sandbox" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen="true" style="position: absolute; visibility: hidden; display: none; width: 0px; height: 0px; padding: 0px; border: none;" title="Twitter analytics iframe" src="./src/saved_resource.html"></iframe></body></html>
