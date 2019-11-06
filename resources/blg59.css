@@ -1,5 +1,5 @@
 html body {
-    background-color: #001a00;
+    background-color: #402F18;
     color: #89cce2;
     font-family: "Palatino Linotype",Palatino,serif;
     height: 100%;
@@ -161,6 +161,7 @@ li {
 
 .target {
     border: 2px solid #ffffff;
+    background-color: #25190C;
     border-radius: 3px;
     font-size: 110%;
     margin-top: 10px;
