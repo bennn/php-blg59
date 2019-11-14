@@ -37,7 +37,7 @@ figcaption {
 
 .header {
     margin-top: 1%;
-    margin-bottom: 5%;
+    margin-bottom: 1%;
     text-align: center;
     height: 10%;
     width: 100%;
@@ -83,7 +83,7 @@ figcaption {
     margin-bottom: 5%;
     margin-left: 20%;
     margin-right: 20%;
-    margin-top: 1%;
+    margin-top: 4px;
     padding-bottom: 1%;
     padding-left: 2%;
     padding-right: 2%;
