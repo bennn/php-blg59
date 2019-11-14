@@ -1,10 +1,9 @@
-todo.org
-
 *\.aux
-*\.blg
 *\.bbl
+*\.blg
+*\.dvi
 *\.log
 *\.out
-*\.dvi
 *\.swp
+*\.toc
 *\.swo

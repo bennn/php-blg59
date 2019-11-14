@@ -98,6 +98,29 @@ figcaption {
     text-indent: 2%;
 }
 
+.widecol {
+    background-color: #d8d2c9;
+    border: 5px solid #a2998b;
+    color: #222222;
+    margin-bottom: 5%;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 4px;
+    padding-bottom: 1%;
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-top: 1%;
+}
+
+.widecol p {
+    line-height: 250%;
+}
+
+.widecol p a {
+    margin-right: 5%;
+    white-space: nowrap;
+}
+
 .container {
   display:flex;
   justify-content:center;
