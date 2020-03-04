@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <title>Running a pkg-build today</title>
+    <meta name="description" content="_posted by Ben Greenman, Alex Knauth, and Fred Fu_  Suppose you've made a change to Racket and want to test it against all  packages in the main catalog. The `pkg-build` package can help, provided you have:  (1) a modified version of Racket and  (2) a san...">
+    <meta name="author"      content="The Unknown Author">
+    <meta name="keywords"    content="">
+    <meta name="viewport"    content="width=device-width, initial-scale=1.0">
+    <link rel="icon"      href="/favicon.ico">
+    <link rel="canonical" href="http://blog.racket-lang.org/2019/12/running-pkg-build-today.html">
+    <link rel="next" href="/2019/11/racket-v7-5.html">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="./src/main.css">
+    <link rel="stylesheet" type="text/css" href="./src/blog-fonts.css">
+    <!-- Feeds -->
+    <link rel="alternate" type="application/atom+xml" href="/feeds/all.atom.xml" title="Atom Feed">
+    <link rel="alternate" type="application/rss+xml" href="/feeds/all.rss.xml" title="RSS Feed">
+    <!-- JS -->
+    </head>
+  <body>
+<row class="one-column" id="logo"><col-1><a href="http://racket-lang.org"><div id="logo-container"><img id="logo" src="./src/racket-logo.svg"/> Racket</div></a></col-1><col-2><p><a href="/index.html">blog</a></p></col-2></row>
+<article>
+<row>
+
+<col-1>
+  <p class='date-and-tags'>14 Dec 2019</p>
+
+</col-1>
+
+<col-2>
+  <header>
+  <h1>Running a pkg-build today</h1>
+  </header>
+
+<p><em>posted by Ben Greenman, Alex Knauth, and Fred Fu</em></p>
+
+<p>Suppose you&rsquo;ve made a change to Racket and want to test it against all  packages in the <a href="https://pkgd.racket-lang.org">main catalog</a>. The <a href="https://github.com/racket/pkg-build"><code>pkg-build</code></a> package can help, provided you have:  (1) a modified version of Racket and  (2) a sandbox VM to build packages on. This post explains how to meet these requirements.</p>
+<!-- more-->
+
+<h2 id="why-pkg-build">Why <code>pkg-build</code>?</h2>
+
+<p>Backwards compatibility matters. New changes to packages in the Racket <a href="https://github.com/racket/main-distribution/blob/master/info.rkt">main distribution</a>  should not change old programs without a very good reason.</p>
+
+<p>One way to assess the damages of a possibly-breaking change is to use  the <a href="https://github.com/racket/pkg-build"><code>pkg-build</code></a> package to compile and test every package  registered in the <a href="https://pkgd.racket-lang.org">main package catalog</a>. If any package fails, the error message may suggest a way to improve the changes.</p>
+<!-- [PLaneT](http://planet.racket-lang.org/)-->
+
+<p>A build starts with a modified version of Racket  and a sandbox virtual machine (VM). For every package in the catalog, <code>pkg-build</code> installs the package and its  dependencies in a new environment on the VM. This way:</p>
+
+<ul>
+ <li>packages that have conflicting dependencies get tested without interfering  with one another,  <!-- example? (pict3d and ruckus seem compatible)--></li>
+ <li>packages that require a huge amount of time or memory get killed,</li>
+ <li>and cleanups/re-builds are easy.</li></ul>
+
+<h3 id="motivating-example-typed-racket">Motivating Example: Typed Racket</h3>
+
+<p>As of February 2020, Typed Racket pull request <a href="https://github.com/racket/typed-racket/pull/882">#882</a> weakens  the types derived from untyped predicates. This change fixes a <a href="https://github.com/racket/typed-racket/issues/457">soundness bug</a>,  but may raise type errors in programs that rely on the old behavior. See the pull request for details.</p>
+
+<p>Since we recently ran <code>pkg-build</code> on a modified Typed Racket for that pull  request, this post uses Typed Racket as a concrete example. If you copy/paste code below, look out for parts that need to be adapted  for different changes.</p>
+<!-- good example for other packages ... probably bad example for racket/racket ?-->
+
+<h2 id="how-to-run-pkg-build">How to Run <code>pkg-build</code></h2>
+
+<p>There are four high-level steps to running a build:  create a modified distribution of Racket,  serve the distribution,  configure a sandbox VM,  and run. Eventually, your host machine will serve a page that resembles  <a href="https://download.racket-lang.org/releases/7.6/">download.racket-lang.org</a>;  running <code>pkg-build</code> starts up the VM and installs Racket from that page.</p>
+
+<h4 id="table-of-contents">Table of Contents</h4>
+
+<ol style="margin-left: 2em">
+ <li><a href="#step-1-create-a-modified-package-catalog-and-racket-distribution">Create a modified package catalog and Racket distribution</a>
+  <ol type="a" style="margin-left: 1em; margin-top: 1ex">
+   <li>(optional) <a href="#step-1a-optional-create-a-sandbox-vm">Create a sandbox VM</a></li>
+   <li><a href="#step-1b-copy-a-base-catalog">Copy a base catalog</a></li>
+   <li><a href="#step-1c-edit-the-catalog">Edit the catalog</a></li>
+   <li><a href="#step-1d-build-racket-from-the-catalog">Build Racket from the catalog</a></li></ol></li>
+ <li><a href="#step-2-serve-the-modified-racket-distribution">Serve the modified Racket distribution</a>
+  <ol type="a" style="margin-left: 1em; margin-top: 1ex">
+   <li>(optional) <a href="#step-2a-optional-transfer-files-from-the-sandbox-vm">Transfer files from the sandbox VM</a></li>
+   <li><a href="#step-2b-serve-site">Serve site</a></li></ol></li>
+ <li><a href="#step-3-create-a-sandbox-vm-and-snapshot">Create a sandbox VM and snapshot</a></li>
+ <li><a href="#step-4-build-packages">Build packages</a>
+  <ol type="a" style="margin-left: 1em; margin-top: 1ex">
+   <li><a href="#step-4a-set-up-pkg-build">Set up pkg-build</a></li>
+   <li><a href="#step-4b-build-packages">Run the build</a></li></ol></li></ol>
+
+<h3 id="step-0-create-a-new-directory"><strong>Step 0</strong>: Create a new directory</h3>
+
+<p>Make a new directory for the build on your host machine. Use any name that you like.</p>
+
+<pre><code>  mkdir ~/my-build
+  cd ~/my-build</code></pre>
+
+<br />
+
+<h3 id="step-1-create-a-modified-package-catalog-and-racket-distribution"><strong>Step 1</strong>: Create a modified package catalog and Racket distribution</h3>
+
+<p>The first step is to create a <a href="https://docs.racket-lang.org/pkg/Package_Concepts.html#(part._concept~3acatalog)">package catalog</a>  and a Racket distribution. The catalog points to the changes you want to test. The Racket distribution gets built once from this catalog and re-used on  the VM to build packages.</p>
+
+<h3 id="step-1a-optional-create-a-sandbox-vm"><strong>Step 1a</strong>: (optional) Create a sandbox VM</h3>
+
+<p>A Racket distribution must be built on the same kind of operating system  that uses the distribution. For example, if your host machine is running macOS and you plan to make a Linux  VM, then skip to <a href="#step-3-create-a-sandbox-vm-and-snapshot">Step 3</a> and build  the Racket distribution on the VM.</p>
+
+<h3 id="step-1b-copy-a-base-catalog"><strong>Step 1b</strong>: Copy a base catalog</h3>
+
+<p>Find a modern version of Racket. A <a href="https://snapshot.racket-lang.org/">nightly snapshot</a> or recent source  build work best. The latest release, or a slightly older build, may work.</p>
+
+<p>Choose a name for a new directory,  connect to the Internet,  and run the following command using "<code>raco</code>" from the modern Racket.</p>
+
+<pre><code>  raco pkg catalog-copy --from-config my-catalog/</code></pre>
+
+<br />
+
+<p>All done.</p>
+
+<p>The example command above creates a new directory named <code>my-catalog/</code> that contains:</p>
+
+<ul>
+ <li>a directory <code>pkg/</code> with one file inside for each package (over 2000 files),</li>
+ <li>a file <code>pkgs</code> that lists all package names,</li>
+ <li>and a big file <code>pkgs-all</code> with all the data from the <code>pkg/</code> directory.</li></ul>
+
+<p><strong>Beware!</strong> The generated files, especially <code>pkgs-all</code>, have very long lines that may crash your favorite text editor. They overwhelmed gedit on our VM. These files are meant to be read by Racket programs &mdash; via  <a href="https://docs.racket-lang.org/reference/Reading.html#(def._((quote._~23~25kernel)._read))"><code>read</code></a>  or <a href="https://docs.racket-lang.org/reference/Filesystem.html#(def._((lib._racket%2Ffile..rkt)._file-~3evalue))"><code>file-&gt;value</code></a>.</p>
+
+<h3 id="step-1c-edit-the-catalog"><strong>Step 1c</strong>: Edit the catalog</h3>
+
+<p>Delete the large file <code>my-catalog/pkgs-all</code>.</p>
+
+<p>Ignore the <code>my-catalog/pkgs</code> file.</p>
+
+<p>Figure out which names in the <code>my-catalog/pkg/</code> directory relate to your changes. If you have a new commit for Typed Racket, then there are six relevant names  because one commit to the <a href="https://github.com/racket/typed-racket">Typed Racket repo</a>  affects six packages:  <code>source-syntax</code>, <code>typed-racket</code>, <code>typed-racket-doc</code>, <code>typed-racket-lib</code>,  <code>typed-racket-more</code>, and <code>typed-racket-test</code>.</p>
+
+<p>Each name <code>N</code> correponds to a file <code>my-catalog/pkg/N</code> that contains  <a href="https://docs.racket-lang.org/pkg/Package_Concepts.html#(tech._package._metadata)">metadata</a>  for a package, represented as a hashtable. Your goal is to update the <code>'source</code>, <code>'checksum</code>, and <code>'versions</code> fields in  each hashtable to point to your changes. The new <code>'source</code> is the GitHub URL for your changes. The new <code>'checksum</code> is the matching commit hash. The new <code>'versions</code> must point to your changes as the default,  <a href="https://docs.racket-lang.org/pkg/getting-started.html#(part._.Version_.Exceptions)">un-exceptional</a>  source.</p>
+
+<p>The script below can make these edits for Typed Racket, given:</p>
+
+<ul>
+ <li><code>tgt-user</code> your GitHub username</li>
+ <li><code>tgt-branch</code> the name of the public branch where your changes live</li>
+ <li><code>tgt-commit</code> the commit hash for your changes</li></ul>
+
+<p><strong>edit-catalog.rkt</strong></p>
+
+<pre><code>#lang racket/base
+;; Usage:
+;;   racket edit-catalog.rkt my-catalog/
+
+;; ---
+;; TODO edit these variables
+(define pkg*
+  '("source-syntax" "typed-racket" "typed-racket-doc"
+    "typed-racket-lib" "typed-racket-more" "typed-racket-test"))
+
+(define tgt-repo "typed-racket")
+
+(define tgt-branch "&lt;branch-name&gt;")
+(define tgt-user "&lt;username&gt;")
+(define tgt-commit "&lt;commit-hash&gt;")
+;; ---
+
+; format a GitHub package URL for a branch, see:
+; https://docs.racket-lang.org/pkg/getting-started.html#(part._github-deploy)
+(define (make-tgt-url pkg-name)
+  (format "git://github.com/~a/~a.git?path=~a#~a"
+          tgt-user tgt-repo pkg-name tgt-branch))
+
+;; update three fields: '(source checksum versions)
+(define (update-pkg-hash h pkg-name)
+  (define u (make-tgt-url pkg-name))
+  (let* ((h (hash-set h 'source u))
+         (h (hash-set h 'checksum tgt-commit))
+         (h (if (hash-has-key? h 'versions)
+              (hash-update
+                h 'versions
+                (lambda (vh)
+                  (hash-set
+                    vh 'default
+                    (hash 'source u 'checksum tgt-commit 'source-url u))))
+              h)))
+    h))
+
+;; edit one file
+(define (update-pkg-file p pkg-name)
+  (let* ((h (with-input-from-file p read))
+         (h (update-pkg-hash h pkg-name)))
+    (with-output-to-file p #:exists 'replace (lambda () (writeln h)))))
+
+(module+ main
+  (require racket/cmdline)
+  (command-line
+    #:args (cat-dir)
+    (for ((pkg-name (in-list pkg*)))
+      (define p (build-path cat-dir "pkg" pkg-name))
+      (update-pkg-file p pkg-name))))</code></pre>
+
+<br />
+
+<p>After running the script, you can test your edits by installing the  package from this modified catalog directory. If you edited Typed Racket, the following update should be enough to  preview your changes:</p>
+
+<pre><code> raco pkg update --catalog my-catalog --lookup typed-racket typed-racket-lib</code></pre>
+
+<br />
+
+<p>Make sure to run tests after the update finishes.</p>
+
+<h3 id="step-1d-build-racket-from-the-catalog"><strong>Step 1d</strong>: Build Racket from the catalog</h3>
+
+<p>Clone a new copy of Racket and build using your modified catalog.</p>
+
+<pre><code> cd ~/my-build/
+ git clone git://github.com/racket/racket
+ cd racket
+ make site SRC_CATALOG=../my-catalog</code></pre>
+
+<br />
+
+<p>This will take some time.</p>
+
+<p>Note: <code>make site</code> must start from a clean repo. If something goes wrong along the way, make a new clone before retrying. Refer to the <a href="https://docs.racket-lang.org/racket-build-guide/index.html">Racket Build Guide</a> (aka <a href="https://github.com/racket/racket/blob/master/build.md">build.md</a>) for more information.</p>
+
+<p>This command makes a new directory <code>~/my-build/racket/build/site/</code> with a  few files, including:</p>
+
+<ul>
+ <li><code>build/site/installers/table.rktd</code> must contain a hashtable from strings  to paths. Ours contains <code>#hash(("localhost" . "racket-7.6.0.14-x86_64-linux.sh"))</code></li>
+ <li><code>build/site/index.html</code> should resemble the picture below. For us, the  link <em>localhost</em> points to an install script</li></ul>
+
+<p><img src="./src/build-site-index-example.png" alt="Example" border="1" style="margin-left: 2em; width: 70%" /></p>
+
+<h3 id="step-2-serve-the-modified-racket-distribution"><strong>Step 2</strong>: Serve the modified Racket distribution</h3>
+
+<p>The next step is to make the built Racket distribution available through  a web server running on your host machine.</p>
+
+<h3 id="step-2a-optional-transfer-files-from-the-sandbox-vm"><strong>Step 2a</strong>: (optional) Transfer files from the sandbox VM</h3>
+
+<p>If you followed <a href="#step-1a-optional-create-a-sandbox-vm">Step 1a</a> and built  the Racket site on the sandbox VM, then copy the <code>build/site/</code> directory  onto your host machine.</p>
+
+<h3 id="step-2b-serve-site"><strong>Step 2b</strong>: Serve site</h3>
+
+<p>Start a local web server to host the install. One way to run a server is with Python:</p>
+
+<pre><code> cd ~/my-build/racket/build/site
+ python3.7 -m http.server 8000</code></pre>
+
+<br />
+
+<p>If Python responds with a <code>PermissionError</code>, try changing <code>8000</code> to a different port number.</p>
+
+<p>To double-check the server, open <a href="http://localhost:8000">http://localhost:8000</a> in a web browser.</p>
+
+<h3 id="step-3-create-a-sandbox-vm-and-snapshot"><strong>Step 3</strong>: Create a sandbox VM and snapshot</h3>
+
+<p>Install <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a>. Make sure the <code>VBoxManage</code> executable is on your path.</p>
+
+<p>Create a VM, either using <a href="https://www.vagrantup.com">Vagrant</a> according to  the <a href="https://github.com/racket/pkg-build/blob/master/example/README.md"><code>pkg-build/example/</code> README</a>  or <a href="https://github.com/racket/pkg-build/blob/master/README.md#local-builds">manually</a>. After following those instructions, you should have:</p>
+
+<ul>
+ <li>a VM named <code>pkg-build</code>,</li>
+ <li>with a user named <code>racket</code> that can run <code>sudo</code> without a password,</li>
+ <li>with <a href="https://www.virtualbox.org/manual/ch06.html#network_hostonly">host-only networking</a> enabled,</li>
+ <li>and exactly one snapshot of the VM named <code>init</code>.</li></ul>
+
+<p>Get the IP address of the VM. If you created a Linux VM, running <code>hostname -I</code> should print this address. Then, with the VM running, try the following command on your host machine to test  the network connection &mdash; after replacing the sample address (<code>192....</code>)  with your VM&rsquo;s address:</p>
+
+<pre><code> ssh racket@192.168.99.100</code></pre>
+
+<br />
+
+<p>Running <code>ssh</code> for the first time may raise a yes/no prompt about the login. Type &ldquo;y&rdquo;. Future logins must succeed with no prompt.</p>
+
+<h3 id="step-4-build-packages"><strong>Step 4</strong>: Build packages</h3>
+
+<p>The final step is to install <code>pkg-build</code> and point it to your web server  and sandbox VM.</p>
+
+<h3 id="step-4a-set-up-pkg-build"><strong>Step 4a</strong>: Set up pkg-build</h3>
+
+<p>Clone and install the <a href="https://github.com/racket/pkg-build"><code>pkg-build</code></a> repo on your host machine.</p>
+
+<pre><code>  cd ~/my-build
+  git clone git://github.com/racket/pkg-build
+  raco pkg install ./pkg-build</code></pre>
+
+<br />
+
+<p>Create a file named <code>run.rkt</code> that starts from the template in the  <a href="https://github.com/racket/pkg-build#running-a-build">pkg-build README</a>. Edit this file:</p>
+
+<ul>
+ <li>the vbox <code>#:host</code> must match your VM&rsquo;s IP address,</li>
+ <li>the <code>#:snapshot-url</code> must point to your web server from <a href="#step-2b-serve-site">Step 2c</a>  (likely <a href="http://localhost:8000">http://localhost:8000</a>),</li>
+ <li>the <code>#:installer-platform-name</code> must match a key in the <code>site/installers/table.rktd</code> file  from <a href="#step-1d-build-racket-from-the-catalog">Step 1d</a></li></ul>
+
+<p>Here is one <code>run.rkt</code> that we used for a successful build, after  some trial and error with timeouts.</p>
+
+<pre><code>#lang racket/base
+
+(require pkg-build)
+
+(build-pkgs
+ #:vms (list (vbox-vm #:name "pkg-build" #:host "192.168.99.100"))
+ #:snapshot-url "http://0.0.0.0:8000"
+ #:timeout 2100
+ #:installer-platform-name "localhost")</code></pre>
+
+<br />
+
+<h3 id="step-4b-build-packages"><strong>Step 4b</strong>: Build packages</h3>
+
+<p>Make sure the VM is off. Run the <code>run.rkt</code> file above;  we recommend redirecting the output to a log:</p>
+
+<pre><code>  cd ~/my-build
+  racket run.rkt &gt;&amp; pkg-build.log</code></pre>
+
+<br />
+
+<p>This command should run for hours,  starting and stopping the VM periodically. If all goes well, the final log will contain details on any new package errors.</p>
+
+<p>If you cancel the build mid-way, restarting <code>run.rkt</code> should resume at  approximately the same state. To restart from the beginning, delete the files that <code>pkg-build</code> generated  in the current directory and re-run.</p>
+
+<h2 id="example-log-output">Example log output</h2>
+
+<p>Our log for a modified Typed Racket began with the following lines,  and then proceeded to archive every package:</p>
+
+<pre><code>&gt;&gt; Getting installer table
+Installer is racket-7.5.0.11-x86_64-linux.sh
+&gt;&gt; Downloading installer racket-7.5.0.11-x86_64-linux.sh
+&gt;&gt; Archiving packages from
+ http://0.0.0.0:8000/catalog/ https://pkgs.racket-lang.org/
+== Archiving 1d6 ==
+checksum: ae3bf1fc265bd1815dc8f9d6bbb153afdbf3a53d
+Downloading repository https://github.com/jessealama/1d6.git
+....</code></pre>
+
+<br />
+
+<p>Some package archives failed, for example:</p>
+
+<pre><code>== Archiving simple-csv ==
+checksum: f71d9b92826203cacf483ab5b2379fd18f8585d3
+Downloading repository git://github.com/pragun/simple-csv
+git-checkout: could not parse ref pkt
+  pkt: "Repository not found.\n"
+SKIPPING simple-csv</code></pre>
+
+<br />
+
+<p>But most succeeded, including the Typed Racket packages.</p>
+
+<p>After the archive, the build first tests the connection to the VM:</p>
+
+<pre><code>Creating catalog ~/my-build/server/archive/catalog
+&gt;&gt; Starting server at locahost:18333 for ~/my-build/server/archive
+&gt;&gt; Starting VM pkg-build
+Stopping VirtualBox machine "pkg-build"
+VBoxManage: error: Machine 'pkg-build' is not currently running
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
+Restoring snapshot 'init' (52bd14a8-783c-4e06-b60f-14730464f196)
+Starting VirtualBox machine "pkg-build"
+Waiting for VM "pkg-build" to power on...
+VM "pkg-build" has been successfully started.
+/usr/bin/ssh -R 18333:localhost:18333 racket@192.168.99.100
+  '/usr/bin/env' 'PLTUSERHOME=/home/racket/build-pkgs/user'
+  'PLT_PKG_BUILD_SERVICE=1' 'CI=true' 'PLTSTDERR=debug@pkg error'
+  'PLT_INFO_ALLOW_VARS=;PLT_PKG_BUILD_SERVICE' '/bin/sh' '-c' 'echo hello'
+hello</code></pre>
+
+<br />
+
+<p>then installs Racket and starts building individual packages.</p>
+
+<p>For each package, the script starts the VM for a setup,  restarts to run tests, and finally shuts down the VM:</p>
+
+<pre><code>&gt;&gt; ========================================
+&gt;&gt; Building unstable-contract-lib
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
+
+....[clipped]....
+
+Stopping VirtualBox machine "pkg-build"
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
+&gt;&gt; ========================================
+&gt;&gt; Testing unstable-contract-lib
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
+
+....[clipped]....
+
+Stopping VirtualBox machine "pkg-build"
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%</code></pre>
+
+<br />
+
+<p>Our change led to a few &ldquo;Type Checker&rdquo; errors during calls to <code>raco setup</code>. These errors did not stop the build, which went on to render documentation  and generate a few HTML pages to summarize the results.</p>
+
+<h2 id="ways-to-fail">Ways to fail</h2>
+
+<p>Before the successful run, we hit many problems. Here are a few error messages and solutions.</p>
+
+<h4 id="step-1b-copy-a-base-catalogstep-1b-ssl-connect-error"><a href="#step-1b-copy-a-base-catalog">Step 1b</a>: ssl-connect error</h4>
+
+<pre><code>$ raco pkg catalog-copy --from-config my-catalog
+osx-ssl-connect: connection failed
+  message: The operation couldn’t be completed.
+           (kCFErrorDomainCFNetwork error 2.)
+  address: download.racket-lang.org
+  port number: 443</code></pre>
+
+<br />
+
+<p>Connect to the Internet and try again.</p>
+
+<br />
+
+<h4 id="step-4b-build-packagesstep-4b-hash-ref-failed"><a href="step-4b-build-packages">Step 4b</a>: hash-ref failed</h4>
+
+<pre><code>$ racket run.rkt
+hash-ref: no value found for key
+  key: "{1} Racket | {3} Linux | {4} x64_64 (64-bit), natipkg; built on Debian"</code></pre>
+
+<br />
+
+<p>Open <code>site/installers/table.rktd</code>, copy the key from the hashtable  inside, and paste it into <code>run.rkt</code> for the <code>#:installer-platform-name</code> keyword argument.</p>
+
+<br />
+
+<h4 id="step-4b-build-packagesstep-4b-system-got-f"><a href="step-4b-build-packages">Step 4b</a>: system* got <code>#f</code></h4>
+
+<pre><code>$ racket run.rkt
+Creating catalog /home/racket/racket-pkg-build/server/archive/catalog
+&gt;&gt; Starting server at locahost:18333 for ~/my-build/server/archive
+&gt;&gt; Starting VM pkg-build
+Stopping VirtualBox machine "pkg-build"
+system*: contract violation
+  expected: path-string?</code></pre>
+
+<br />
+
+<p>Put the <code>VBoxManage</code> executable on your host-machine PATH and try again. (This error comes from code in the <a href="https://github.com/racket/remote-shell"><code>racket/remote-shell</code></a> repo.)</p>
+
+<br />
+
+<h4 id="step-4b-build-packagesstep-4b-could-not-find-a-registered-machine"><a href="step-4b-build-packages">Step 4b</a>: could not find a registered machine</h4>
+
+<pre><code>$ racket run.rkt
+Creating catalog /home/racket/racket-pkg-build/server/archive/catalog
+&gt;&gt; Starting server at locahost:18333 for ~/my-build/server/archive
+&gt;&gt; Starting VM pkg-build
+Stopping VirtualBox machine "pkg-build"
+VBoxManage: error: Could not find a registered machine named 'pkg-build'
+VBoxManage: error: Details: code VBOX_E_OBJECT_NOT_FOUND (0x80bb0001),
+            component VirtualBoxWrap, interface IVirtualBox, callee nsISupports
+VBoxManage: error: Context: "FindMachine(Bstr(a-&gt;argv[0]).raw(),
+            machine.asOutParam())" at line 382 of file VBoxManageControlVM.cpp
+VBoxManage: error: Could not find a registered machine named 'pkg-build'
+VBoxManage: error: Details: code VBOX_E_OBJECT_NOT_FOUND (0x80bb0001),
+            component VirtualBoxWrap, interface IVirtualBox, callee nsISupports
+VBoxManage: error: Context: "FindMachine(Bstr(VMNameOrUuid).raw(),
+            machine.asOutParam())" at line 2621 of file VBoxManageInfo.cpp
+vbox-state: could not get virtual machine status: "pkg-build"</code></pre>
+
+<br />
+
+<p>Here, <code>pkg-build</code> is the <code>#:name</code> argument in the <code>run.rkt</code> script. This error can occur when the VM is on when the script runs. Shut down the VM and try again.</p>
+
+<br />
+
+<h4 id="step-4b-build-packagesstep-4b-tcp-connect-failed-connection-refused"><a href="step-4b-build-packages">Step 4b</a>: tcp-connect failed, connection refused</h4>
+
+<pre><code>$ racket run.rkt
+&gt;&gt; Getting installer table
+tcp-connect: connection failed
+  address: 0.0.0.0
+  port number: 8000
+  system error: Connection refused; errno=111</code></pre>
+
+<br />
+
+<p>Check that the web server is running on the correct port (<a href="#step-2b-serve-site">Step 2b</a>)  and try again.</p>
+
+<br />
+
+<h4 id="step-4b-build-packagesstep-4b-ssh-could-not-resolve-hostname"><a href="step-4b-build-packages">Step 4b</a>: ssh could not resolve hostname</h4>
+
+<pre><code>$ racket run.rkt
+....
+Waiting for VM "racket-pkg-build" to power on...
+VM "racket-pkg-build" has been successfully started.
+/usr/bin/ssh -R 18333:localhost:18333 racket@10.0.2.15
+  '/usr/bin/env' 'PLTUSERHOME=/home/racket/build-pkgs/user'
+  'PLT_PKG_BUILD_SERVICE=1' 'CI=true' 'PLTSTDERR=debug@pkg error'
+  'PLT_INFO_ALLOW_VARS=;PLT_PKG_BUILD_SERVICE' '/bin/sh' '-c' 'echo hello'
+ssh: Could not resolve hostname 10.0.2.15: nodename nor servname provided,
+     or not known
+....
+ssh: failed</code></pre>
+
+<br />
+
+<p>Double-check that the VM&rsquo;s IP address &mdash; taken from <code>hostname -I</code> or <code>ifconfig</code>  &mdash; matches the <code>#:host</code> argument in the <code>run.rkt</code> script.</p>
+
+<br />
+
+<h4 id="step-4b-build-packagesstep-4b-ssh-timeout-early-build"><a href="step-4b-build-packages">Step 4b</a>: ssh timeout, early-build</h4>
+
+<p>If <code>ssh</code> fails with a timeout at an early stage in the <code>pkg-build</code>,  try turning on the VM and connecting from your host machine &mdash; without running  <code>run.rkt</code>. If <code>ssh</code> asks for a yes/no response, then say &ldquo;y&rdquo;, disconnect, turn off the VM,  and try again.</p>
+
+<br />
+
+<h4 id="step-4b-build-packagesstep-4b-ssh-timeout-mid-build"><a href="step-4b-build-packages">Step 4b</a>: ssh timeout, mid-build</h4>
+
+<pre><code>Timeout after 600 seconds
+ssh: failed
+  context...:
+   ~/my-build/pkg-build/main.rkt:1397:5
+   ~/my-build/pkg-build/main.rkt:123:0: build-pkgs57
+   "~/my-build/run.rkt": [running body]
+   temp37_0
+   for-loop
+   run-module-instance!125
+   perform-require!78
+Stopping VirtualBox machine "pkg-build"
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%</code></pre>
+
+<br />
+
+<p>Open <code>run.rkt</code>, add or increase the <code>#:timeout</code> argument to the <code>build-pkgs</code>  function.</p>
+
+<br />
+
+<h4 id="step-4b-build-packagesstep-4b-ssh-failed-no-route-to-host"><a href="step-4b-build-packages">Step 4b</a>: ssh failed, no route to host</h4>
+
+<pre><code>&gt;&gt; ========================================
+&gt;&gt; Building brag-lib
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
+Restoring snapshot 'installed' (62bb5ff2-9239-403f-afd7-6c911d19176f)
+Starting VirtualBox machine "pkg-build"
+Waiting for VM "pkg-build" to power on
+VM "pkg-build" has been successfully started
+/usr/bin/ssh -R 18333:localhost:18333 racket@192.168.99.100
+  '/usr/bin/env' 'PLTUSERHOME=/home/racket/build-pkgs/user'
+  'PLT_PKG_BUILD_SERVICE=1' 'CI=true' 'PLTSTDERR=debug@pkg error'
+  'PLT_PKG_BUILD_SERVICE=1' 'CI=true' 'PLTSTDERR=debug@pkg error'
+  'PLT_INFO_ALLOW_VARS=;PLT_PKG_BUILD_SERVICE' '/bin/sh' '-c' 'echo hello'
+ssh: connect to host 192.168.99.100 port 22: No route to host^M
+ssh: failed
+  context...:
+   ~/.racket/7.5/pkgs/remote-shell-lib/ssh.rkt:180:2: loop
+   ~/my-build/racket/collects/racket/contract/private/arrow-val-first.rkt:555:3
+   ~/my-build/pkg-build/main.rkt:882:5
+   ~/my-build/pkg-build/main.rkt:1065:2: build-pkg-set
+   [repeats 1 more time]
+   ~/my-build/pkg-build/main.rkt:123:0: build-pkgs57
+   "~/my-build/run.rkt": [running body]
+   temp37_0
+   for-loop
+   run-module-instance!125
+   perform-require!78
+Stopping VirtualBox machine "pkg-build"
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%</code></pre>
+
+<br />
+
+<p>Try again, maybe with a longer <code>#:timeout</code>. We saw this error but are not sure why it happened.</p>
+
+<br />
+<col-2>
+
+</row>
+
+<footer>
+<row>
+<col-1>
+</col-1>
+<col-2>
+
+
+<h2><span class="label">prev</span> <a class="previous" href="/2019/11/racket-v7-5.html">Racket v7.5</a></h2>
+
+</col-2>
+</row>
+</footer>
+
+</article>
+
+<row class="one-column" id="bottom"><col-1></col-1><col-2>
+<p>Made with <a href="https://github.com/greghendershott/frog">Frog</a>, a static-blog generator written in Racket.
+<br /><a href="https://github.com/racket/racket-lang-org">Source code</a> for this blog.</col-2></row>
+  </body>
+</html>
