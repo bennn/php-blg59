@@ -259,7 +259,7 @@
 <p>For further reading on type tailoring, and a sketch of how to prove the  soundness of a tailoring, we have a draft paper:</p>
 
 <ul>
- <li><a href="http://www.ccs.neu.edu/home/types/resources/type-tailoring.pdf"><code>http://www.ccs.neu.edu/home/types/resources/type-tailoring.pdf</code></a></li></ul>
+ <li><a href="http://hdl.handle.net/2047/D20324606">http://hdl.handle.net/2047/D20324606</a></li></ul>
 
 <p>The draft also reports on a small evaluation of our tailored  <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code> on existing code. We searched the Racket distribution and libraries for uses of <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>  and found over 300 in untyped code. We then converted these uses to Typed Racket. After converting, most uses did not compile using Typed Racket’s <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code>,  but swapping in the tailored <code><a href="http://docs.racket-lang.org/reference/regexp.html#(def._((quote._~23~25kernel)._regexp-match))" style="color: inherit">regexp-match</a></code> (a 1-line change) removed  the type errors in over 250 cases.</p>
 
