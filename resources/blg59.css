@@ -103,8 +103,8 @@ figcaption {
     border: 5px solid #a2998b;
     color: #222222;
     margin-bottom: 5%;
-    margin-left: 10%;
-    margin-right: 10%;
+    margin-left: 15%;
+    margin-right: 15%;
     margin-top: 4px;
     padding-bottom: 1%;
     padding-left: 2%;
@@ -112,13 +112,10 @@ figcaption {
     padding-top: 1%;
 }
 
-.widecol p {
-    line-height: 250%;
-}
-
 .widecol p a {
-    margin-right: 5%;
+    margin-right: 40px;
     white-space: nowrap;
+    line-height: 250%;
 }
 
 .container {
