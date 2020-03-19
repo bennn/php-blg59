@@ -99,7 +99,12 @@
 
 <h3 id="step-1a-optional-create-a-sandbox-vm"><strong>Step 1a</strong>: (optional) Create a sandbox VM</h3>
 
-<p>A Racket distribution must be built on the same kind of operating system  that uses the distribution. For example, if your host machine is running macOS and you plan to make a Linux  VM, then skip to <a href="#step-3-create-a-sandbox-vm-and-snapshot">Step 3</a> and build  the Racket distribution on the VM.</p>
+<p>A Racket distribution must be built on the same kind of operating system  that uses the distribution. For example, if your host machine is running macOS and you plan to make a Linux  VM, then:</p>
+
+<ul>
+ <li>follow <a href="#step-3-create-a-sandbox-vm-and-snapshot">Step 3</a> to create a VM;</li>
+ <li>return here, follow the Step 1 instructions on the VM;</li>
+ <li>and follow <a href="#step-2a-optional-transfer-files-from-the-sandbox-vm">Step 2a</a> below.</li></ul>
 
 <h3 id="step-1b-copy-a-base-catalog"><strong>Step 1b</strong>: Copy a base catalog</h3>
 
@@ -257,7 +262,7 @@
  <li>a VM named <code>pkg-build</code>,</li>
  <li>with a user named <code>racket</code> that can run <code>sudo</code> without a password,</li>
  <li>with <a href="https://www.virtualbox.org/manual/ch06.html#network_hostonly">host-only networking</a> enabled,</li>
- <li>and exactly one snapshot of the VM named <code>init</code>.</li></ul>
+ <li>and exactly one snapshot of the VM named <code>init</code>.  (If you made two or more snapshots, delete them to avoid issues.)</li></ul>
 
 <p>Get the IP address of the VM. If you created a Linux VM, running <code>hostname -I</code> should print this address. Then, with the VM running, try the following command on your host machine to test  the network connection &mdash; after replacing the sample address (<code>192....</code>)  with your VM&rsquo;s address:</p>
 
@@ -284,6 +289,7 @@
 <p>Create a file named <code>run.rkt</code> that starts from the template in the  <a href="https://github.com/racket/pkg-build#running-a-build">pkg-build README</a>. Edit this file:</p>
 
 <ul>
+ <li>the vbox <code>#:name</code> must match your VM&rsquo;s name (<code>"pkg-build"</code>, if you followed the <code>pkg-build</code> README exactly)</li>
  <li>the vbox <code>#:host</code> must match your VM&rsquo;s IP address,</li>
  <li>the <code>#:snapshot-url</code> must point to your web server from <a href="#step-2b-serve-site">Step 2c</a>  (likely <a href="http://localhost:8000">http://localhost:8000</a>),</li>
  <li>the <code>#:installer-platform-name</code> must match a key in the <code>site/installers/table.rktd</code> file  from <a href="#step-1d-build-racket-from-the-catalog">Step 1d</a></li></ul>
