@@ -36,6 +36,18 @@ figcaption {
 }
 
 .header {
+    margin-top: 10px;
+    margin-bottom: 8px;
+    text-align: center;
+    height: 35px;
+    width: 100%;
+}
+
+.header h1 {
+    margin-bottom: 0px;
+}
+
+.mainheader {
     margin-top: 1%;
     margin-bottom: 1%;
     text-align: center;
@@ -43,20 +55,20 @@ figcaption {
     width: 100%;
 }
 
-.header a {
+.mainheader h1 {
+    margin-bottom: 0px;
+}
+
+.mainheader a {
     text-decoration: none;
     font-size: 120%;
     color: #f9e6ff;
 }
 
-.header p {
+.mainheader p {
     margin-top: 0px;
     margin-bottom: 0px;
     font-size: 95%;
-}
-
-.header h1 {
-    margin-bottom: 0px;
 }
 
 .keepalive {
