@@ -1,7 +1,12 @@
 html body {
-    background-color: #002900;
+    background-image: url("img/webster-woods.jpeg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    //background-color: #002900;
     // background-color: #060f2b;
-    color: #89cce2;
+    //color: #89cce2;
+    color: #222222;
     font-family: "Palatino Linotype",Palatino,serif;
     height: 100%;
     width: 100%;
@@ -63,7 +68,7 @@ figcaption {
 .mainheader a {
     text-decoration: none;
     font-size: 120%;
-    color: #f9e6ff;
+    color: #333333;
 }
 
 .mainheader p {
@@ -135,6 +140,8 @@ figcaption {
   display:flex;
   justify-content:center;
   align-items:center;
+  margin-left: 2px;
+  margin-right: 2px;
 }
 
 .hiddenlink {
@@ -194,12 +201,13 @@ li {
 .nav a {
   text-decoration: none;
   font-family: "Lucida Console", Monaco, monospace;
-  color: #00ff99;
+  //color: #00ff99;
+  color: #444444;
 }
 
 .target {
-    border: 2px solid #ffffff;
-    background-color: #25190C;
+    border: 2px solid #555555;
+    background-color: #f8f2a9;
     border-radius: 3px;
     font-size: 110%;
     margin-top: 10px;
