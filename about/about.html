@@ -13,43 +13,46 @@
     <div class="container nav">
       <a href="../index.html"><div class="target">
         <p>
-          About
+        <span class="navraisebox">&#9650;</span>
+        About
+        &nbsp;
         </p>
       </div></a>
     </div>
     <div class="midcol">
       <p>
         Ben Greenman, Ph.D.
-        <br/>
+        <br/>&nbsp;
         <a href="https://cifellows2020.org/">CIFellows</a> postdoc at Brown
         mentored by <a href="http://cs.brown.edu/~sk/">Shriram Krishnamurthi</a>.
-        <br/>
+        <br/>&nbsp;
         <a class="colorlink" href="https://orcid.org/0001-0001-7078-9287">orcid <tt>0001-0001-7078-9287</tt></a>
       </p>
       <p>
-        Research interests: programming languages, gradual and migratory type systems, language interoperability, formal methods, human factors.
+      Research interests: &nbsp; programming languages, gradual and migratory type systems, language interoperability, formal methods, human factors.
       </p>
       <p style="margin-left: 40px;margin-right: 40px;">
-        Q. <em>In what ways can high-assurance code and highly-flexible code interoperate,
-          and what pros and cons does each mix entail?</em>
-        <br/>
-        In a perfect world, all sorts of code would interoperate without any loss of flexibility
-        or formal guarantees.
+        Q. <em>How to effectively combine high-assurance code and low-assurance code?</em>
+        <br/><br/>
+        In a perfect world, all sorts of code would be able to interoperate:
+        formally-verified code, exploratory scripts, legacy tools, generic utilites, etc.
         We're not there yet!
-        Maintaining both flexibility and guarantees is a challenge, and calls for either
-        ahead-of-time validation of the flexible code (very very difficult in general)
-        or run-time checking (very expensive).
-        To find a balance, it is critical that we develop <b>rigorous methods</b>
-        to assess guarantees, measure performance, and evaluate usability.
-        <!-- gotta measure ... guarantees performance usability -->
+        The problem is the boundaries.
+        In order to create a mix that preserves guarantees and flexibility, we need to
+        either validate the boundaries to low-assurace code ahead of time (very very difficult in general)
+        or check them at run time (very expensive).
+        Neither option is a clear winner.
+        The challenge is thus to find effective tradeoffs in a complex space.
+        The key to success is to <b>develop rigorous methods</b> to assess
+        guarantees, measure performance, and evaluate usability.
       </p>
       <p class="indent">
         <div>
           Research Overview:
         </div>
         <ul>
-          <li>2021-11-29: Faculty application materials <a class="colorlink" href="../resources/hiring-2021.html">[here]</a></li>
-          <li>2019-10-03: Brief summary of my work on migratory typing <a class="colorlink" href="../resources/pdf/bg-mt-2019.pdf">[pdf]</a></li>
+          <li><a class="colorlink" href="../resources/hiring-2021.html">2021-11-29</a>: Faculty application materials</li>
+          <li><a class="colorlink" href="../resources/pdf/bg-mt-2019.pdf">2019-10-03</a>: Brief summary of my work on migratory typing</li>
         </ul>
       </p>
       <p class="indent">
@@ -57,11 +60,11 @@
           Active topics:
         </div>
         <ul>
-          <li>Curating the <a class="colorlink" href="https://docs.racket-lang.org/gtp-benchmarks/">GTP Benchmarks</a></li>
-          <li>Measuring deep/shallow/untyped overhead on <a class="colorlink" href="https://cloudlab.us">Cloudlab</a></li>
-          <li>Hardening numeric code against exceptions</li>
-          <li>Language engineering in <a href="https://github.com/tnelson/forge/wiki" class="colorlink">Forge</a>.</li>
-          <li>Studying the responses from a Typed Racket survey.</li>
+          <li style="margin-bottom: 8px">Curating the <a class="colorlink" href="https://docs.racket-lang.org/gtp-benchmarks/">GTP Benchmarks</a></li>
+          <li style="margin-bottom: 8px">Measuring deep/shallow/untyped overhead on <a class="colorlink" href="https://cloudlab.us">Cloudlab</a></li>
+          <li style="margin-bottom: 8px">Hardening numeric code against exceptions</li>
+          <li style="margin-bottom: 8px">Language engineering in <a href="https://github.com/tnelson/forge/wiki" class="colorlink">Forge</a>.</li>
+          <li style="margin-bottom: 8px">Studying the responses from a Typed Racket survey.</li>
 
           <!--Types as obligations-->
           <!--RP2 generic <li>Benchmarking <tt>racket/dict</tt> dependent contracts.</li>-->
@@ -100,10 +103,20 @@
       <p class="indent">
         <div>
           Last Known Location: <div class="keepalive">Status:</div>
-          <div id="location">Alexandria, VA &nbsp; <tt>[UTC-0400]</tt></a>
+          <div id="location">&nbsp;Alexandria, VA &nbsp; <tt>[UTC-0400]</tt></a>
           <img id="build-status" class="keepalive" src="https://img.shields.io/badge/build-fine-green.svg" alt="build:k" title="build:ok"/>
         </div>
       </p>
+
+      <p>
+      Formerly:<br/>&nbsp;
+        Ph.D. at Northeastern advised by <a class="colorlink" href="http://felleisen.org/matthias/">Matthias Felleisen</a>,<br/>&nbsp;
+        M.Eng. in CS at Cornell advised by <a class="colorlink" href="http://www.cs.cornell.edu/~ross/">Ross Tate</a>,<br/>&nbsp;
+        B.S. in <a class="colorlink" href="https://www.ilr.cornell.edu/">ILR</a> at Cornell.
+      </p>
+      <p><a class="colorlink" href="http://prl.ccs.neu.edu/blog/tags/by-Ben-Greenman.html">PRL Blog</a></p>
+      <p>Extra bio info <a class="colorlink" href="../extras/extras.html">here</a>.</p>
+      <div class="doodle">
       <!-- <p class="indent"> -->
       <!--   The dream is to seamlessly mix code written at different levels of assurance. -->
       <!--   My formally-verified module should be safe to interact with a simply-typed program, and even a script. -->
@@ -121,15 +134,6 @@
       <!--   Now if only I could figure out what an object is. -->
       <!-- </p> -->
 
-      <p>
-        Formerly:
-        Ph.D. at Northeastern advised by <a class="colorlink" href="http://felleisen.org/matthias/">Matthias Felleisen</a>,
-        M.Eng. in CS at Cornell advised by <a class="colorlink" href="http://www.cs.cornell.edu/~ross/">Ross Tate</a>,
-        B.S. in <a class="colorlink" href="https://www.ilr.cornell.edu/">ILR</a> at Cornell.
-      </p>
-      <p><a class="colorlink" href="http://prl.ccs.neu.edu/blog/tags/by-Ben-Greenman.html">PRL Blog</a></p>
-      <p>Extra bio info <a class="colorlink" href="../extras/extras.html">here</a>.</p>
-      <div class="doodle">
         <!-- <img src="../resources/img/doodle/bug.png"/> -->
       </div>
     </div>
