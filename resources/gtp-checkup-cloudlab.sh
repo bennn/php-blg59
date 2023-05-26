@@ -6,8 +6,9 @@ cd racket-8.8/src/build
 cd ../../..
 ./racket-8.8/bin/raco pkg install --auto --clone gtp-checkup
 cd gtp-checkup
-RACO="../racket-8.8/bin/raco"
+BIND="/users/ben_g/racket-8.8/bin"
+RACO="${BIND}/raco"
 MAIN=main.rkt
-PLT_TR_NO_CONTRACT_OPTIMIZE=1 ${RACO} make ${MAIN} >& output.txt
-PLT_TR_NO_CONTRACT_OPTIMIZE=1 PLTSTDERR="error info@gtp-checkup" ${RACO} test ${MAIN} >& output.txt
+${RACO} make ${MAIN}
+PLTSTDERR="error info@gtp-checkup" ${BIND}/racket ${MAIN} ${BIND} >& ../output-8.8.txt
 cd ..
