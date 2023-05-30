@@ -16,3 +16,6 @@ MAIN=main.rkt
 ${RACO} make ${MAIN}
 PLTSTDERR="error info@gtp-checkup" ${BIND}/racket ${MAIN} ${BIND} >& ../output-8.8.txt
 cd ..
+
+### count chaps (need patch)
+### for X in gtp-checkup/benchmarks/*/*/main.rkt ; do echo "(require gtp-checkup/private/count-chaps) (count-chaps)" >> ${X}; done
